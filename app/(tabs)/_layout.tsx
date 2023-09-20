@@ -25,8 +25,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Search',
+          tabBarIcon: ({ color }) => <TabBarIcon name="search" color={color} />,
           headerRight: () => (
             <Link href="/modal" asChild>
               <Pressable>
@@ -43,13 +43,23 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
-        name="two"
+        name="chat"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Chat',
+          tabBarIcon: ({ color }) => <TabBarIcon name="comment" color={color} />,
         }}
       />
+
+      <Tabs.Screen
+        name="home"
+        options={{
+          title: 'Center',
+          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+        }}
+      />
+      
     </Tabs>
   );
 }
