@@ -16,9 +16,15 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.uchat.uchat",
+      "buildNumber": "1.0.0",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
+      "package": "com.uchat.uchat",
+      "googleServicesFile":"google-services.json",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -30,7 +36,15 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "@react-native-firebase/app",
+      [
+        "expo-build-properties",
+        {
+          "useFrameworks":"static"
+        }
+      ]
+      
     ],
     "experiments": {
       "typedRoutes": true

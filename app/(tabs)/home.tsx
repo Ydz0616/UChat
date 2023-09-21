@@ -1,15 +1,22 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet , TextInput, Button} from 'react-native';
+import React,{Component} from 'react';
 
 import EditScreenInfo from '../../components/EditScreenInfo';
 import { Text, View } from '../../components/Themed';
 
-export default function TabThreeScreen() {
+
+
+export default async function TabThreeScreen() {
+  
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Home</Text>
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
       <EditScreenInfo path="app/(tabs)/home.tsx" />
+
     </View>
+    
   );
 }
 
