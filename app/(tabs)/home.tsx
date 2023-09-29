@@ -1,14 +1,11 @@
 import { StyleSheet , TextInput, Button} from 'react-native';
-import React,{Component} from 'react';
 
 import EditScreenInfo from '../../components/EditScreenInfo';
 import { Text, View } from '../../components/Themed';
 
 
 
-export default async function TabThreeScreen() {
-  
-  
+export default function TabThreeScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Home</Text>
