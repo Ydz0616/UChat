@@ -1,7 +1,8 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from "firebase/firestore";
-import {getAuth} from "firebase/auth";
+import { initializeAuth, getAuth, getReactNativePersistence } from "firebase/auth";
 import "firebase/firestore";
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 // Optionally import the services that you want to use
 // import {...} from "firebase/auth";
 // import {...} from "firebase/database";
@@ -23,6 +24,9 @@ const firebaseConfig = {
 
 const FIREBASE_APP = initializeApp(firebaseConfig);
 const FIREBASE_DB= getFirestore(FIREBASE_APP);
+initializeAuth(FIREBASE_APP, {
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+});
 const FIREBASE_AUTH = getAuth(FIREBASE_APP);
 
 // let app and db be visable to all files that import firebaseConfig.js
