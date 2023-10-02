@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Button, TextInput, useColorScheme, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { ScrollView } from 'react-native';
-
+import {
+  getAuth,
+  signInWithEmailAndPassword ,
+  createUserWithEmailAndPassword,
+  sendEmailVerification
+} from 'firebase/auth';  
+import { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
+import 'firebase/firestore'
 
 export default function TabThreeScreen({}) {
   const colorScheme = useColorScheme();
@@ -15,7 +22,9 @@ export default function TabThreeScreen({}) {
   const [hobbies, setHobbies] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
-
+  const [password, setPassword] = useState('');
+  const auth  = FIREBASE_AUTH;
+  const db = FIREBASE_DB;
   // Function to generate a random username
   const generateRandomUsername = () => {
     const adjectives = ['Happy', 'Sad', 'Funny', 'Clever', 'Lucky', 'Graceful'];
@@ -33,8 +42,35 @@ export default function TabThreeScreen({}) {
     setIsEditing(true);
   };
   // We can add logic here later to send data to Firebase
-  const handleSaveProfile = () => {
+  
+  const handleSaveProfile = async () => {
     setIsEditing(false);
+    
+    // sign up with email and password
+   
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      // send email verification, then after successful verification add the user to database 'user' collection
+      await sendEmailVerification(user);
+      // db.collection()
+      // // add user to database 'user' collection
+      // // await db.collection('users').doc(user.uid).set({
+      // //   username: username,
+      // //   classYear: classYear,
+      // //   major: major,
+      // //   hobbies: hobbies,
+      // //   phoneNumber: phoneNumber,
+      // //   email: email
+      // // });
+      
+    
+      console.log(user);
+      
+    } catch (error) {
+      console.log(error);
+    }
+
   };
 
   const handleRegenerateUsername = () => {
@@ -47,6 +83,18 @@ export default function TabThreeScreen({}) {
       {isEditing ? (
         <View>
           <Text style={styles.editProfileTitle}>Edit Profile</Text>
+          <TextInput
+            placeholder="Email"
+            value={email}
+            onChangeText={(text) => setEmail(text)}
+            style={[styles.input, { color: textColor }]}
+          />
+          <TextInput
+            placeholder="Password"
+            value={password}
+            onChangeText={(text) => setPassword(text)}
+            style={[styles.input, { color: textColor }]}
+          />
           <TextInput
             placeholder="Class Year"
             value={classYear}
@@ -71,12 +119,7 @@ export default function TabThreeScreen({}) {
             onChangeText={(text) => setPhoneNumber(text)}
             style={[styles.input, { color: textColor }]}
           />
-          <TextInput
-            placeholder="Email"
-            value={email}
-            onChangeText={(text) => setEmail(text)}
-            style={[styles.input, { color: textColor }]}
-          />
+          
           <Button title="Save Profile" onPress={handleSaveProfile} />
         </View>
       ) : (

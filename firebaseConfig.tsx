@@ -1,5 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from "firebase/firestore";
+import {getAuth} from "firebase/auth";
+import "firebase/firestore";
 // Optionally import the services that you want to use
 // import {...} from "firebase/auth";
 // import {...} from "firebase/database";
@@ -19,9 +21,12 @@ const firebaseConfig = {
 //   measurementId: 'G-measurement-id',
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const FIREBASE_APP = initializeApp(firebaseConfig);
+const FIREBASE_DB= getFirestore(FIREBASE_APP);
+const FIREBASE_AUTH = getAuth(FIREBASE_APP);
+
 // let app and db be visable to all files that import firebaseConfig.js
-export { app, db };
+export { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH };
+
 // For more information on how to access Firebase in your project,
 // see the Firebase documentation: https://firebase.google.com/docs/web/setup#access-firebase
