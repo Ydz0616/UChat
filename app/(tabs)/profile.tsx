@@ -8,6 +8,7 @@ import {
   createUserWithEmailAndPassword,
   sendEmailVerification
 } from 'firebase/auth';  
+import { updateDoc } from 'firebase/firestore';
 import { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
 import 'firebase/firestore'
 
@@ -45,28 +46,9 @@ export default function TabThreeScreen({}) {
   
   const handleSaveProfile = async () => {
     setIsEditing(false);
-    
-    // sign up with email and password
-   
+       
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      // send email verification, then after successful verification add the user to database 'user' collection
-      await sendEmailVerification(user);
-      // db.collection()
-      // // add user to database 'user' collection
-      // // await db.collection('users').doc(user.uid).set({
-      // //   username: username,
-      // //   classYear: classYear,
-      // //   major: major,
-      // //   hobbies: hobbies,
-      // //   phoneNumber: phoneNumber,
-      // //   email: email
-      // // });
-      
-    
-      console.log(user);
-      
+      // 
     } catch (error) {
       console.log(error);
     }

@@ -22,6 +22,7 @@ import {
 } from 'firebase/auth';  
 import { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH } from '../firebaseConfig';
 import 'firebase/firestore'
+import { doc,addDoc,collection, getDoc } from 'firebase/firestore';
 
 enum AuthState {
   Undetermined,
@@ -38,7 +39,7 @@ export default function Index() {
   const [authState, setAuthState] = useState(AuthState.Undetermined);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
+  const db = FIREBASE_DB;
   FIREBASE_AUTH.onAuthStateChanged((user) => {
     if (authState == AuthState.Undetermined) {
       if (user) { 
@@ -55,7 +56,24 @@ export default function Index() {
     // TODO: check if profile exists; if not, setAuthState(AuthState.CreateProfile); if so,
     router.replace(HOME_PAGE)
 
-    // const user = FIREBASE_AUTH.currentUser;
+    const user = FIREBASE_AUTH.currentUser;
+   
+
+    // one possible implementation
+    // if(user){
+    //   const docRef = doc(db, "users", user.uid);
+    //   const docSnap = await getDoc(docRef);
+    //   if (docSnap.exists()) {
+    //     router.replace(HOME_PAGE);
+    //   } else {
+    //     setAuthState(AuthState.CreateProfile);
+    //   }
+
+    // }
+    
+    // implementation ends here
+
+
     // const userDoc = await FIREBASE_DB.collection('users').doc(user.uid).get();
     // if (userDoc.exists) {
     //   router.replace(HOME_PAGE);
@@ -69,8 +87,10 @@ export default function Index() {
 
     try {
       await signInWithEmailAndPassword(FIREBASE_AUTH, fullEmail, password);
-      router.replace(HOME_PAGE)
-    } catch (error) {
+      const user = FIREBASE_AUTH.currentUser;
+      console.log(user);
+      // router.replace(HOME_PAGE)
+    } catch (error: any) {
       switch (error.code) {
         case 'auth/invalid-email':
           Alert.alert("Invalid Email", "Please enter a valid Duke email address. Do not include @duke.edu; it will be added automatically.", [
@@ -112,8 +132,26 @@ export default function Index() {
     try {
       const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, fullEmail, password);
       const user = userCredential.user;
-      await sendEmailVerification(user);
-    } catch (error) {
+      // one possible implementation 
+      // await sendEmailVerification(user);
+      await sendEmailVerification(user).then(() => {
+
+        addDoc(collection(db,'users'),{
+          uid: user.uid,
+          email: user.email,
+          password : password,
+          classYear: '',
+          major: '',
+          hobbies: [],
+          phoneNumber: '',
+          username:''
+          // profilePicture: ''
+
+        })
+  
+      })
+      
+    } catch (error:any) {
       switch (error.code) {
         case 'auth/email-already-in-use':
           Alert.alert("Account Exists", "An account with this email address already exists.", [
