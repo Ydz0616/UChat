@@ -1,7 +1,14 @@
-import React, { useState } from 'react';
-import { StyleSheet, TextInput, FlatList } from 'react-native';
-import { Text, View } from '../../components/Themed';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, FlatList } from 'react-native';
+import { Text, View, TextInput } from '../../components/Themed';
+import { FIREBASE_DB } from '../../firebaseConfig';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
+interface Person {
+  uid: string;
+  username: string;
+  hobbies: string[];
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -29,26 +36,32 @@ const styles = StyleSheet.create({
 
 export default function TabOneScreen() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [data, setData] = useState([
-    { id: '1', name: 'Bloated Giraffe', hobbies: ['Reading', 'Swimming', 'Gardening', 'Cooking'] },
-  { id: '2', name: 'Diseased Wart', hobbies: ['Traveling', 'Cooking', 'Painting', 'Coding'] },
-  { id: '3', name: 'Enigmatic Tornado', hobbies: ['Hiking', 'Photography', 'Fishing', 'Dancing'] },
-  { id: '4', name: 'Dead Dog', hobbies: ['Writing', 'Traveling', 'Singing', 'Gaming'] },
-  { id: '5', name: 'Buttered Fly', hobbies: ['Swimming', 'Cooking', 'Reading', 'Cycling'] },
-  { id: '6', name: 'Mysterious Ball', hobbies: ['Painting', 'Reading', 'Cooking', 'Gardening'] },
-  { id: '7', name: 'Ugly Person', hobbies: ['Gaming', 'Coding', 'Traveling', 'Hiking'] },
-  { id: '8', name: 'THe the', hobbies: ['Dancing', 'Singing', 'Writing', 'Traveling'] },
-  { id: '9', name: 'Plastic Otter', hobbies: ['Fishing', 'Cycling', 'Photography', 'Reading'] },
-  { id: '10', name: 'Camping Guy', hobbies: ['Cooking', 'Painting', 'Traveling', 'Writing'] },
-    // Add more data objects as needed
-  ]);
-  const searchTermSplit = searchTerm.split(',').map(term => term.toLowerCase().trim());
+  const [userHobbies, setUserHobbies] = useState<Person[]>([]);
 
-  const filteredData = searchTerm == '' ? data : data.filter(item => {
-    const hobbies = item.hobbies.map(hobby => hobby.toLowerCase());
-    // return hobbies.includes(searchTerm.toLowerCase());
-    return searchTermSplit.some(term => hobbies.some(hobby => term != '' && hobby.startsWith(term))); // replaced with db query?
-  });
+  useEffect(() => {
+    const fetchData = async () => {
+      const users = collection(FIREBASE_DB, 'users');
+      // const querySnapshot = await getDocs(users);
+      const searchTermSplit = searchTerm.split(',').map(term => term.trim()); // TODO: add back in toLowerCase()
+
+      const q = searchTerm == '' ? query(users) : query(users, where('hobbies', 'array-contains-any', searchTermSplit));
+      const querySnapshot = await getDocs(q);
+
+      const hobbiesData: Person[] = [];
+      querySnapshot.forEach((doc) => {
+        const user = doc.data();
+        hobbiesData.push({
+          uid: user.uid,
+          username: user.username,
+          hobbies: user.hobbies === null ? ['No Hobbies'] : user.hobbies,
+        });
+      });
+
+      setUserHobbies(hobbiesData);
+    };
+
+    fetchData();
+  }, [searchTerm]); 
 
   return (
     <View style={styles.container}>
@@ -59,14 +72,14 @@ export default function TabOneScreen() {
         value={searchTerm}
       />
       <FlatList
-        data={filteredData}
+        data={userHobbies}
         renderItem={({ item }) => (
           <View style={styles.resultContainer}>
-            <Text style={styles.nameText}>{item.name}</Text>
+            <Text style={styles.nameText}>{item.username}</Text>
             <Text>{item.hobbies.join(', ')}</Text>
           </View>
         )}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item.uid}
       />
     </View>
   );
