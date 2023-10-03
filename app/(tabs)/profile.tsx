@@ -10,7 +10,6 @@ import {
 } from 'firebase/auth';  
 import { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
 import { getFirestore, collection, addDoc, query, where, updateDoc, getDocs } from 'firebase/firestore';
-
 export default function TabThreeScreen({}) {
   const firestore = getFirestore(FIREBASE_APP);
   const colorScheme = useColorScheme();
@@ -70,7 +69,7 @@ export default function TabThreeScreen({}) {
   const handleEditProfile = () => {
     setIsEditing(true);
   };
-  
+
   const handleSaveProfile = async () => {
     setIsEditing(false);
 
