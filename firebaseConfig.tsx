@@ -3,6 +3,16 @@ import { getFirestore } from "firebase/firestore";
 import { initializeAuth, getAuth, getReactNativePersistence } from "firebase/auth";
 import "firebase/firestore";
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  API_KEY,
+  AUTH_DOMAIN,
+  DATABASE_URL,
+  PROJECT_ID,
+  STORAGE_BUCKET,
+  MESSAGING_SENDER_ID,
+  APP_ID
+} from '@env';
+
 // Optionally import the services that you want to use
 // import {...} from "firebase/auth";
 // import {...} from "firebase/database";
@@ -12,13 +22,13 @@ import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: 'AIzaSyASwEvJkTS1rIiYuxhys5QNoBUFoxPRcXU',
-  authDomain: 'icebreaker-16bc6.firebaseapp.com',
-  databaseURL: 'https://icebreaker-16bc6.firebaseio.com',
-  projectId: 'icebreaker-16bc6',
-  storageBucket: 'icebreaker-16bc6.appspot.com',
-  messagingSenderId: '603545245121',
-  appId: '381750a6a409b80f630b40',
+  apiKey: API_KEY,
+  authDomain: AUTH_DOMAIN,
+  databaseURL: DATABASE_URL,
+  projectId: PROJECT_ID,
+  storageBucket: STORAGE_BUCKET,
+  messagingSenderId: MESSAGING_SENDER_ID,
+  appId: APP_ID,
 //   measurementId: 'G-measurement-id',
 };
 
