@@ -23,7 +23,6 @@ import {
 import { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH } from '../firebaseConfig';
 import 'firebase/firestore'
 import { doc,addDoc,collection, getDoc } from 'firebase/firestore';
-
 enum AuthState {
   Undetermined,
   EnterEmailPassword,
