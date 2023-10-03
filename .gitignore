@@ -41,3 +41,7 @@ expo-env.d.ts
 # @end expo-cli
 
 .env
+google-services.json
+GoogleService-Info.plist
+android/app/google-services.json
+ios/uchat/GoogleService-Info.plist
