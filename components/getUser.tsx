@@ -16,13 +16,13 @@ import {
 } from 'react-native';
 
 import { FIREBASE_DB, FIREBASE_AUTH, FIREBASE_APP } from '../firebaseConfig';
-import { updateDoc, doc, setDoc ,getDoc,  serverTimestamp, onSnapshot } from '@firebase/firestore';
+import { updateDoc, doc,addDoc, setDoc ,getDoc,  serverTimestamp, onSnapshot, collection } from '@firebase/firestore';
 
-export function GetUser(){
+
   
 
 
-    const selectUser = async () => { 
+export async function selectUser () { 
         const db  = FIREBASE_DB;
         const currentUser = FIREBASE_AUTH.currentUser;
         // this is a static test example, we'll inpelement real examples
@@ -69,17 +69,9 @@ export function GetUser(){
         }
 
       }
-      return (
-        <View>
-        <TouchableOpacity style={styles.button}>
-      
-          <Text style={styles.buttonText}>Accept</Text>
-
-        </TouchableOpacity>
-      </View>
-      );
+  
     
-}
+
 
 const styles = StyleSheet.create({
   button: {

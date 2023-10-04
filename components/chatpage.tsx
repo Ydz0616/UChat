@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {GetUser} from './getUser';
+import { selectUser} from './getUser';
 import {
   View,
   Text,
@@ -78,11 +78,7 @@ const ChatPage = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       
-      <View style={styles.userHeader}>
-        {/* write a button with the selectuser event */}
-  
-     
-     
+      <View style={styles.userHeader}>     
       {/* <Image source={userAvatar} style={styles.avatar} /> */}
       {/* <Text style={styles.userName}>{userName}</Text> */}
     </View>

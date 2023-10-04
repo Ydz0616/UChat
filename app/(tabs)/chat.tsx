@@ -2,10 +2,11 @@ import { StyleSheet } from 'react-native';
 import EditScreenInfo from '../../components/EditScreenInfo';
 import { Text, View } from '../../components/Themed';
 import ChatPage from '../../components/chatpage';
-
+import { selectUser } from '../../components/getUser';
 import React, { useState } from 'react';
 
 import { TouchableOpacity } from 'react-native';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 
 export default function TabTwoScreen() {
@@ -13,6 +14,8 @@ export default function TabTwoScreen() {
 
   // Define a function to handle the button click and show the ChatPage
   const handleAcceptRequest = () => {
+    console.log('Accepting request...');
+    selectUser();
     setShowChat(true);
   };
 
@@ -25,9 +28,11 @@ export default function TabTwoScreen() {
           <Text style={styles.messageText}>
             You received a friend request from{' '}
             <Text style={styles.senderText}>Crazy Giraffe</Text>. Do you want to accept it?
-          </Text>
+          </Text>    
+          {/* <View> <GetUser></GetUser></View> */}
           <TouchableOpacity onPress={handleAcceptRequest} style={styles.button}>
             <Text style={styles.buttonText}>Accept</Text>
+          
           </TouchableOpacity>
         </View>
       )}
