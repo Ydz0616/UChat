@@ -22,7 +22,7 @@ import {
 } from 'firebase/auth';  
 import { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH } from '../firebaseConfig';
 import 'firebase/firestore'
-import { doc,addDoc,collection, getDoc } from 'firebase/firestore';
+import { doc,addDoc,collection, getDoc, setDoc } from 'firebase/firestore';
 enum AuthState {
   Undetermined,
   EnterEmailPassword,
@@ -133,23 +133,7 @@ export default function Index() {
       const user = userCredential.user;
       // one possible implementation 
       // await sendEmailVerification(user);
-      await sendEmailVerification(user).then(() => {
-
-        addDoc(collection(db,'users'),{
-          uid: user.uid,
-          email: user.email,
-          password : password,
-          classYear: '',
-          major: '',
-          hobbies: [],
-          phoneNumber: '',
-          username:''
-          // profilePicture: ''
-
-        })
-  
-      })
-      
+      await sendEmailVerification(user)
     } catch (error:any) {
       switch (error.code) {
         case 'auth/email-already-in-use':
@@ -193,6 +177,21 @@ export default function Index() {
     // TODO: Display create profile component
     // setAuthState(AuthState.CreateProfile)
 
+    // create user profile
+    await addDoc(collection(db,'users',user.uid),{
+      uid: user.uid,
+      classYear: '',
+      major: '',
+      hobbies: [],
+      phoneNumber: '',
+      username:''
+      // profilePicture: ''
+
+    })
+    // create user chat
+    await addDoc(collection(db,'userchats',user.uid),{})
+    
+ 
     router.replace(HOME_PAGE)
   }
 

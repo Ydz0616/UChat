@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import {GetUser} from './getUser';
 import {
   View,
   Text,
@@ -12,27 +13,54 @@ import {
   SafeAreaView,
 } from 'react-native';
 
+import { FIREBASE_DB, FIREBASE_AUTH, FIREBASE_APP } from '../firebaseConfig';
+import { updateDoc, doc, where,setDoc, addDoc ,getDoc, collection, serverTimestamp, onSnapshot } from '@firebase/firestore';
+
 const ChatPage = () => {
   const [messages, setMessages] = useState([
     { id: '1', text: 'Hello!', isUser: false },
     { id: '2', text: 'Hi there!', isUser: true },
     { id: '3', text: 'This is a sample message from the user.', isUser: true },
-    { id: '4', text: 'And here is a sample reply from the chatbot.', isUser: false },
-    // Add more sample messages as needed
   ]);
-  const userAvatar = require('../assets/images/favicon.png'); // Replace with the actual path to the user's avatar
-  const userName = 'John Doe'; // Replace with the user's name
-  const [newMessage, setNewMessage] = useState('');
-  const flatListRef = useRef<FlatList | null>(null);
 
+  const db  = FIREBASE_DB;
+  const currentUser = FIREBASE_AUTH.currentUser;
+  // this is a static test example, we'll inpelement real examples
+  // after the notification system is done
+  const uid = 'e0lkvGkocPUPJCvWbeZiq8SCv2o1'
+  const flatListRef = useRef<FlatList | null>(null);
+  
+  const [newMessage, setNewMessage] = useState('');
+  const fetchMessages = () => {
+    
+    if (!currentUser?.uid) return; // No user UID, do nothing
+
+    const chatDocRef = doc(db, 'userchats', currentUser?.uid);
+
+    return onSnapshot(chatDocRef, (snapshot) => {
+      
+      //TODO: need another layer of logic to see if the user have any chats
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        const newMessages = data?.messages || [];
+        setMessages(newMessages);
+        console.log('new messages', newMessages);
+      }
+      else {
+        console.log('No messages');
+        
+      }
+      
+      
+    }); 
+  };
   const handleSendMessage = () => {
     if (newMessage.trim() === '') {
       return;
     }
+    
+    const newMessageObj = { id: String(Date.now()), text: newMessage, uid: uid, isUser: currentUser?.uid };
 
-    const newMessageObj = { id: String(Date.now()), text: newMessage, isUser: true };
-
-    setMessages([...messages, newMessageObj]);
     setNewMessage('');
 
     // Scroll to the bottom of the chat when a new message is sent
@@ -41,11 +69,22 @@ const ChatPage = () => {
     }
   };
 
+
+
+
+
+
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      
       <View style={styles.userHeader}>
-      <Image source={userAvatar} style={styles.avatar} />
-      <Text style={styles.userName}>{userName}</Text>
+        {/* write a button with the selectuser event */}
+  
+     
+     
+      {/* <Image source={userAvatar} style={styles.avatar} /> */}
+      {/* <Text style={styles.userName}>{userName}</Text> */}
     </View>
       <FlatList
         data={messages}
@@ -89,6 +128,7 @@ const ChatPage = () => {
     </SafeAreaView>
   );
 };
+
 
 const styles = StyleSheet.create({
   userHeader: {
