@@ -22,7 +22,7 @@ import { updateDoc, doc,addDoc, setDoc ,getDoc,  serverTimestamp, onSnapshot, co
   
 
 
-export async function selectUser () { 
+export async function SelectUser () { 
         const db  = FIREBASE_DB;
         const currentUser = FIREBASE_AUTH.currentUser;
         // this is a static test example, we'll inpelement real examples

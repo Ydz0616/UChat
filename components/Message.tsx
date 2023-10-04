@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { selectUser} from './getUser';
+
 import {
   View,
   Text,
@@ -12,57 +12,56 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
-
 import { FIREBASE_DB, FIREBASE_AUTH, FIREBASE_APP } from '../firebaseConfig';
-import { updateDoc, doc, where,setDoc, addDoc ,getDoc, collection, serverTimestamp, onSnapshot } from '@firebase/firestore';
+import { updateDoc, doc,arrayUnion, setDoc, addDoc ,getDoc, collection, serverTimestamp, onSnapshot, Timestamp } from '@firebase/firestore';
 
-const ChatPage = () => {
-  const [messages, setMessages] = useState([
-    { id: '1', text: 'Hello!', isUser: false },
-    { id: '2', text: 'Hi there!', isUser: true },
-    { id: '3', text: 'This is a sample message from the user.', isUser: true },
-  ]);
-
+const Message = () => {
   const db  = FIREBASE_DB;
   const currentUser = FIREBASE_AUTH.currentUser;
+  
+  const  [messages, setMessages] = useState([{id:null, text:null, sender_id:null}])
   // this is a static test example, we'll inpelement real examples
   // after the notification system is done
-  const uid = 'e0lkvGkocPUPJCvWbeZiq8SCv2o1'
+  var uid = 'e0lkvGkocPUPJCvWbeZiq8SCv2o1' // Yuandong
+  if ( currentUser?.uid == uid) {
+    uid = '2Hth0GlLU0a6h0asCgJ550lZgBG2' // Jordan
+  }
+  const combinedID = currentUser?.uid! > uid 
+  ? currentUser?.uid + uid 
+  : uid + currentUser?.uid;
   const flatListRef = useRef<FlatList | null>(null);
   
   const [newMessage, setNewMessage] = useState('');
-  const fetchMessages = () => {
-    
-    if (!currentUser?.uid) return; // No user UID, do nothing
 
-    const chatDocRef = doc(db, 'userchats', currentUser?.uid);
+  useEffect(() => {
+    const unSub = onSnapshot(doc(db, "chats", combinedID), (doc) => {
+      doc.exists() && setMessages(doc.data().messages);
+    });
 
-    return onSnapshot(chatDocRef, (snapshot) => {
-      
-      //TODO: need another layer of logic to see if the user have any chats
-      if (snapshot.exists()) {
-        const data = snapshot.data();
-        const newMessages = data?.messages || [];
-        setMessages(newMessages);
-        console.log('new messages', newMessages);
-      }
-      else {
-        console.log('No messages');
-        
-      }
-      
-      
-    }); 
-  };
-  const handleSendMessage = () => {
+    return () => {
+      unSub();
+    };
+  }, [combinedID]);
+  const handleSendMessage = async() => {
     if (newMessage.trim() === '') {
       return;
     }
+    if(currentUser?.uid){
+      try{
+        const combinedID = currentUser?.uid> uid 
+          ? currentUser?.uid + uid 
+          : uid + currentUser?.uid;
+        const newMessageObj = { id: Timestamp.now(), text: newMessage, sender_id:currentUser?.uid};
+        await updateDoc(doc(db,'chats',combinedID),{
+          messages:arrayUnion(newMessageObj)
+        });
+        
+        setNewMessage('');
+      }catch(error){
+        console.log(error);
+      }
     
-    const newMessageObj = { id: String(Date.now()), text: newMessage, uid: uid, isUser: currentUser?.uid };
-
-    setNewMessage('');
-
+    }
     // Scroll to the bottom of the chat when a new message is sent
     if (flatListRef.current) {
       flatListRef.current.scrollToEnd();
@@ -78,26 +77,27 @@ const ChatPage = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       
-      <View style={styles.userHeader}>     
+      <View style={styles.userHeader}>
+        {/* write a button with the selectuser event */}  
       {/* <Image source={userAvatar} style={styles.avatar} /> */}
       {/* <Text style={styles.userName}>{userName}</Text> */}
     </View>
       <FlatList
         data={messages}
-        keyExtractor={(item) => item.id}
+        // keyExtractor={(item) => item.id}
         renderItem={({item }) => (
           <View
             style={[
               styles.messageContainer,
               {
-                backgroundColor: item.isUser ? '#007BFF' : '#E5E5EA',
-                alignSelf: item.isUser ? 'flex-end' : 'flex-start',
-                marginLeft: item.isUser ? 90 : 10,
-                marginRight: item.isUser ? 10 : 90,
+                backgroundColor: item.sender_id == currentUser?.uid? '#007BFF' : '#E5E5EA',
+                alignSelf: item.sender_id ==currentUser?.uid? 'flex-end' : 'flex-start',
+                marginLeft: item.sender_id ==currentUser?.uid? 90 : 10,
+                marginRight: item.sender_id ==currentUser?.uid? 10 : 90,
               },
             ]}
           >
-            <Text style={{ color: item.isUser ? 'white' : 'black' }}>{item.text}</Text>
+            <Text style={{ color: item.sender_id ==currentUser?.uid? 'white' : 'black' }}>{item.text}</Text>
           </View>
         )}
         ref={(ref) => {
@@ -109,10 +109,12 @@ const ChatPage = () => {
           }
         }}
       />
-
-      <KeyboardAvoidingView behavior= 'padding' style={styles.inputContainer}>
+      
+      <KeyboardAvoidingView behavior= 'padding' keyboardVerticalOffset={100}  style={styles.inputContainer}>
+        <View style = {styles.inputContainer}>
         <TextInput
           style={styles.input}
+          
           placeholder="Type a message..."
           value={newMessage}
           onChangeText={(text) => setNewMessage(text)}
@@ -120,6 +122,8 @@ const ChatPage = () => {
         <TouchableOpacity onPress={handleSendMessage}>
           <Text style={styles.sendButton}>Send</Text>
         </TouchableOpacity>
+        </View>
+        
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -171,4 +175,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChatPage;
+export default Message;
