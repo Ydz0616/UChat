@@ -38,38 +38,40 @@ export default function TabOneScreen() {
   const [searchTerm, setSearchTerm] = useState('');
   const [userHobbies, setUserHobbies] = useState<Person[]>([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const users = collection(FIREBASE_DB, 'users');
-      // const querySnapshot = await getDocs(users);
-      const searchTermSplit = searchTerm.split(',').map(term => term.trim()); // TODO: add back in toLowerCase()
+  const fetchData = async () => {
+    const users = collection(FIREBASE_DB, 'users');
+    const searchTermSplit = searchTerm.split(',').map(term => term.trim()); // TODO: add back in toLowerCase()
 
-      const q = searchTerm == '' ? query(users) : query(users, where('hobbies', 'array-contains-any', searchTermSplit));
-      const querySnapshot = await getDocs(q);
+    const q = searchTerm == '' ? query(users) : query(users, where('hobbies', 'array-contains-any', searchTermSplit));
+    const querySnapshot = await getDocs(q);
 
-      const hobbiesData: Person[] = [];
-      querySnapshot.forEach((doc) => {
-        const user = doc.data();
-        hobbiesData.push({
-          uid: user.uid,
-          username: user.username,
-          hobbies: user.hobbies === null ? ['No Hobbies'] : user.hobbies,
-        });
+    const hobbiesData: Person[] = [];
+    querySnapshot.forEach((doc) => {
+      const user = doc.data();
+      hobbiesData.push({
+        uid: user.uid,
+        username: user.username,
+        hobbies: user.hobbies === null ? ['No Hobbies'] : user.hobbies,
       });
+    });
 
-      setUserHobbies(hobbiesData);
-    };
+    setUserHobbies(hobbiesData);
+  }
 
+  // only fetch all users on initial load
+  useEffect(() => {
     fetchData();
-  }, [searchTerm]); 
+  }, []); 
 
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.searchInput}
         placeholder="Search by hobby"
+        onSubmitEditing={fetchData}
         onChangeText={setSearchTerm}
         value={searchTerm}
+        returnKeyType='search'
       />
       <FlatList
         data={userHobbies}
