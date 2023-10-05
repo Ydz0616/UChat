@@ -178,7 +178,7 @@ export default function Index() {
     // setAuthState(AuthState.CreateProfile)
 
     // create user profile
-    await addDoc(collection(db,'users',user.uid),{
+    await setDoc(doc(db,'users',user.uid),{
       uid: user.uid,
       classYear: '',
       major: '',
@@ -189,7 +189,7 @@ export default function Index() {
 
     })
     // create user chat
-    await addDoc(collection(db,'userchats',user.uid),{})
+    await setDoc(doc(db,'userchats',user.uid),{})
     
  
     router.replace(HOME_PAGE)

@@ -86,7 +86,7 @@ export default function TabThreeScreen({}) {
           await sendEmailVerification(user);
         }
             // Check if any required field is empty
-        if (!classYear || !major || !hobbies || !phoneNumber || !password) {
+        if (!classYear || !major || !hobbies || !phoneNumber) {
           Alert.alert("Not all of the fields are filled.", "Please fill in the fields.", [
             {text: "Ok"}
           ]);
@@ -102,13 +102,11 @@ export default function TabThreeScreen({}) {
         // User's UID already exists; update the existing document
         const existingDocRef = querySnapshot.docs[0].ref;
         await updateDoc(existingDocRef, {
-          username: username,
-          classYear: classYear,
-          major: major,
-          hobbies: hobbies.map(hobby => hobby.trim()), // Assuming hobbies is a comma-separated list
-          phoneNumber: phoneNumber,
-          password: password,
-          email: user.email,
+          username: username.toLowerCase(),
+          classYear: classYear, 
+          major: major.toLowerCase(),
+          hobbies: hobbies.map(hobby => hobby.trim().toLowerCase()), // Assuming hobbies is a comma-separated list
+          phoneNumber: phoneNumber
         });
       } 
       else {
@@ -146,12 +144,12 @@ export default function TabThreeScreen({}) {
             onChangeText={(text) => setEmail(text)}
             style={[styles.input, { color: textColor }]}
           /> */}
-          <TextInput
+          {/* <TextInput
             placeholder="Password"
             value={password}
             onChangeText={(text) => setPassword(text)}
             style={[styles.input, { color: textColor }]}
-          />
+          /> */}
           <TextInput
             placeholder="Class Year"
             value={classYear.toString()} // Convert the number to a string for the input value
