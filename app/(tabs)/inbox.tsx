@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, FlatList, Button, Pressable, Modal } from 'react-native';
-import { Text, View, TextInput } from '../../components/Themed';
-import { NavigationAction } from '@react-navigation/native';
+import { Text, View } from '../../components/Themed';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
-import { collection, getDocs, query, where, doc, setDoc, serverTimestamp, updateDoc, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, where, serverTimestamp, updateDoc } from 'firebase/firestore';
 
 const styles = StyleSheet.create({
   container: {
@@ -109,7 +108,6 @@ export default function TabOneScreen() {
     }
   }
 
-  // only fetch all users on initial load
   useEffect(() => {
     fetchData();
   }, []);
@@ -128,6 +126,7 @@ export default function TabOneScreen() {
   const handleFriendRequestAction = async (senderUid: string, receiverUid: string, action: string) => {
     try {
       const querySnapshot = await getDocs(
+        // TODO: consider ordering notifications by `timestamp` field
         query(collection(FIREBASE_DB, 'notifications'), where('sender', '==', senderUid), where('receiver', '==', receiverUid))
       );
       const existingDocRef = querySnapshot.docs[0].ref;
