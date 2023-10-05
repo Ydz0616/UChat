@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, FlatList, Pressable, Alert, RefreshControl } from 'react-native';
+import { StyleSheet, FlatList, Pressable, Alert, ActivityIndicator } from 'react-native';
 import { Text, View, TextInput } from '../../components/Themed';
-import { NavigationAction } from '@react-navigation/native';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
-import { collection, getDocs, query, where, doc, setDoc, serverTimestamp, addDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, serverTimestamp, addDoc } from 'firebase/firestore';
 
 interface Person {
   uid: string;
@@ -14,6 +13,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+  },
+  loaderContainer: {
+    flex: 1,
+    zIndex: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   searchInput: {
     height: 40,
@@ -41,6 +46,8 @@ const styles = StyleSheet.create({
 });
 
 export default function TabOneScreen() {
+  const [isLoading, setIsLoading] = useState(true)
+  const [refresh, setRefresh] = useState(0)
   const [searchTerm, setSearchTerm] = useState('');
   const [userHobbies, setUserHobbies] = useState<Person[]>([]);
   const [userFriends, setUserFriends] = useState(new Set())
@@ -48,25 +55,11 @@ export default function TabOneScreen() {
 
   const user = FIREBASE_AUTH.currentUser;
   const fetchData = async () => {
+    setIsLoading(true)
+    // TODO: add timeout
+
     try {
-      // Fetch all users where hobbies match search term
       const users = collection(FIREBASE_DB, 'users');
-      const searchTermSplit = searchTerm.split(',').map(term => term.trim().toLowerCase()); // TODO: add back in toLowerCase()
-
-      const q = searchTerm == '' ? query(users) : query(users, where('hobbies', 'array-contains-any', searchTermSplit));
-      const usersQuerySnapshot = await getDocs(q);
-
-      const hobbiesData: Person[] = [];
-      usersQuerySnapshot.forEach((doc) => {
-        const user = doc.data();
-        hobbiesData.push({
-          uid: user.uid,
-          username: user.username,
-          hobbies: user.hobbies === null ? ['No Hobbies'] : user.hobbies,
-        });
-      });
-
-      setUserHobbies(hobbiesData);
 
       // Fetch user friends
       const friendsQuerySnapshot = await getDocs(
@@ -80,6 +73,7 @@ export default function TabOneScreen() {
       }
       friends.forEach((friendUid: string) => setUserFriends(userFriends.add(friendUid)))
 
+
       // Fetch their pending requests
       const requestQuerySnapshot = await getDocs(
         query(collection(FIREBASE_DB, 'notifications'), where('sender', '==', user!.uid))
@@ -91,7 +85,24 @@ export default function TabOneScreen() {
         }
       });
 
+
+      // Fetch all users where hobbies match search term
+      const searchTermSplit = searchTerm.split(',').map(term => term.trim().toLowerCase());
+      const q = searchTerm == '' ? query(users) : query(users, where('hobbies', 'array-contains-any', searchTermSplit));
+      const usersQuerySnapshot = await getDocs(q);
+
+      const hobbiesData: Person[] = [];
+      usersQuerySnapshot.forEach((doc) => {
+        const user = doc.data();
+        hobbiesData.push({
+          uid: user.uid,
+          username: user.username,
+          hobbies: user.hobbies === null ? ['No Hobbies'] : user.hobbies,
+        });
+      });
       setUserHobbies(hobbiesData);
+
+      setIsLoading(false)
     } catch (error) {
       console.error(error);
     }
@@ -100,7 +111,7 @@ export default function TabOneScreen() {
   // only fetch all users on initial load
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [refresh]);
 
   const handleUserRequestAction = async (receiverUsername: string, receiverUid: string) => {
     Alert.alert('Friend Request', `Are you sure that you want to send a friend request to ${receiverUsername}?`, [
@@ -122,7 +133,7 @@ export default function TabOneScreen() {
         status: 'pending',
         timestamp: serverTimestamp()
       })
-      Alert.alert(`Friend Request Sent to ${receiverUsername}!`)
+      Alert.alert(`Friend Request Sent to ${receiverUsername}!`, '', [{text: 'OK', onPress: () => setRefresh(refresh + 1)}])
     } catch (error) {
       console.error(error)
     }
@@ -138,25 +149,33 @@ export default function TabOneScreen() {
         value={searchTerm}
         returnKeyType='search'
       />
-      <FlatList
-        data={userHobbies}
-        renderItem={({ item }) => (
-          <View style={styles.resultContainer}>
-            <Text style={styles.nameText}>{item.username}</Text>
-            <Text>{item.hobbies.join(', ')}</Text>
-            {/* change option depending on friend and potential request status */}
-            {userFriends.has(item.uid) ? <Text>Already friends!</Text> :
-              pendingRequests.has(item.uid) ? <Text>Friend request pending...</Text> :
-                item.username ?
-                  <Pressable onPress={() => handleUserRequestAction(item.username, item.uid)}>
-                    <Text style={styles.redirect}>Send friend request</Text>
-                  </Pressable> :
-                  null
-            }
-          </View>
-        )}
-        keyExtractor={item => item.uid}
-      />
+      {isLoading ?
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator animating={true} size={'large'} color={'black'} />
+        </View>
+        : null}
+      {userHobbies.length > 0 && !isLoading ?
+        <FlatList
+          data={userHobbies}
+          renderItem={({ item }) => (
+            <View style={styles.resultContainer}>
+              <Text style={styles.nameText}>{item.username}</Text>
+              <Text>{item.hobbies.join(', ')}</Text>
+              {/* change option depending on friend and potential request status */}
+              {userFriends.has(item.uid) ? <Text>Already friends!</Text> :
+                pendingRequests.has(item.uid) ? <Text>Friend request pending...</Text> :
+                  item.username ?
+                    <Pressable onPress={() => handleUserRequestAction(item.username, item.uid)}>
+                      <Text style={styles.redirect}>Send friend request</Text>
+                    </Pressable> :
+                    null
+              }
+            </View>
+          )}
+          keyExtractor={item => item.uid}
+        />
+        : null}
+
     </View>
   );
 }
