@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, FlatList, Pressable, Alert, ActivityIndicator } from 'react-native';
 import { Text, View, TextInput } from '../../components/Themed';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
-import { collection, getDocs, query, where, serverTimestamp, addDoc } from 'firebase/firestore';
+import { collection, getDocs, setDoc,query, where, serverTimestamp, addDoc,doc } from 'firebase/firestore';
 
 interface Person {
   uid: string;
@@ -133,7 +133,11 @@ export default function TabOneScreen() {
 
   const handleFriendRequest = async (receiverUsername: string, receiverUid: string) => {
     try {
-      await addDoc(collection(FIREBASE_DB, 'notifications'), {
+      // if user!.id > receiverUid, then combinedID = receiverUid + user!.id
+      // else combinedID = user!.id + receiverUid
+
+      const combinedID = user!.uid > receiverUid ? receiverUid + user!.uid : user!.uid + receiverUid
+      await setDoc(doc(FIREBASE_DB, 'notifications',combinedID), {
         type: 'friend-request',
         sender: user!.uid,
         receiver: receiverUid,
