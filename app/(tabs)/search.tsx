@@ -35,13 +35,18 @@ const styles = StyleSheet.create({
   },
   nameText: {
     fontSize: 20, // Set the font size to make the name larger
-    color: '#c2e0fc', // Set the color to blue
+    color: 'black', // Set the color to blue
     fontWeight: 'bold', // Optionally, you can make the text bold
   },
   redirect: {
     fontSize: 14,
     color: '#c2e0fc',
     textDecorationLine: 'underline',
+  },
+  status: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    color: 'gray',
   },
 });
 
@@ -162,8 +167,8 @@ export default function TabOneScreen() {
               <Text style={styles.nameText}>{item.username}</Text>
               <Text>{item.hobbies.join(', ')}</Text>
               {/* change option depending on friend and potential request status */}
-              {userFriends.has(item.uid) ? <Text>Already friends!</Text> :
-                pendingRequests.has(item.uid) ? <Text>Friend request pending...</Text> :
+              {userFriends.has(item.uid) ? <Text style={styles.status}>Already friends!</Text> :
+                pendingRequests.has(item.uid) ? <Text style={styles.status}>Friend request pending...</Text> :
                   item.username ?
                     <Pressable onPress={() => handleUserRequestAction(item.username, item.uid)}>
                       <Text style={styles.redirect}>Send friend request</Text>
