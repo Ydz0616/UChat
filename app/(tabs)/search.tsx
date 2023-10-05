@@ -136,7 +136,7 @@ export default function TabOneScreen() {
       // if user!.id > receiverUid, then combinedID = receiverUid + user!.id
       // else combinedID = user!.id + receiverUid
 
-      const combinedID = user!.uid > receiverUid ? receiverUid + user!.uid : user!.uid + receiverUid
+      const combinedID = user!.uid > receiverUid ?  user!.uid + receiverUid : receiverUid + user!.uid 
       await setDoc(doc(FIREBASE_DB, 'notifications',combinedID), {
         type: 'friend-request',
         sender: user!.uid,
