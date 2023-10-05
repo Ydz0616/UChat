@@ -170,7 +170,7 @@ export default function TabOneScreen() {
           </View>
         </View>
       </Modal>
-
+      {userNotifications.length > 0 ?
       <FlatList
         data={userNotifications}
         renderItem={({ item }) => (
@@ -195,6 +195,7 @@ export default function TabOneScreen() {
         )}
         keyExtractor={item => item.uid}
       />
+      : <Text style={styles.modalText}>No notifications</Text>}
     </View>
   );
 }
