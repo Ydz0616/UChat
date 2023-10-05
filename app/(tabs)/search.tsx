@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, FlatList, Pressable, Alert, ActivityIndicator } from 'react-native';
 import { Text, View, TextInput } from '../../components/Themed';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
-import { collection, getDocs, setDoc,query, where, serverTimestamp, addDoc,doc } from 'firebase/firestore';
+import { collection, getDocs, setDoc,query, where, serverTimestamp, addDoc,doc, or } from 'firebase/firestore';
 
 interface Person {
   uid: string;
@@ -83,7 +83,7 @@ export default function TabOneScreen() {
 
       // Fetch their pending requests
       const requestQuerySnapshot = await getDocs(
-        query(collection(FIREBASE_DB, 'notifications'), where('sender', '==', user!.uid))
+        query(collection(FIREBASE_DB, 'notifications'), or(where('sender', '==', user!.uid), where('receiver', '==', user!.uid)))
       );
       requestQuerySnapshot.forEach((doc) => {
         const request = doc.data();
