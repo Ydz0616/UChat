@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, FlatList, Button, Pressable, Modal } from 'react-native';
+import { StyleSheet, FlatList, Button, Pressable, Modal, Alert } from 'react-native';
 import { Text, View } from '../../components/Themed';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
 import { collection, getDocs, query, where, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { CreateChat } from '../../components/Find';
 
 const styles = StyleSheet.create({
   container: {
@@ -63,28 +64,31 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 18,
-    color: '#c2e0fc',
+    color: 'initial',
     fontWeight: 'bold'
   },
   message: {
     fontSize: 16,
-    color: 'white',
+    color: 'initial',
   },
-  underline: {
+  messageHighlight: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#007BFF',
+  },
+  ref: {
     fontSize: 14,
-    color: 'white',
-    textDecorationLine: 'underline',
-  },
-  btn: {
-    width: 50,
+    color: 'gray',
   },
   btngroup: {
     flex: 1,
-    flexBasis: 1 / 2,
+    flexDirection: 'row',
+    justifyContent: 'space-around'
   },
 });
 
 export default function TabOneScreen() {
+  const [refresh, setRefresh] = useState(0)
   const [modalText, setModalText] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [userNotifications, setUserNotifications] = useState<any[]>([])
@@ -110,7 +114,7 @@ export default function TabOneScreen() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [refresh]);
 
   const handleUserInfoRequest = async (senderUid: string) => {
     // TODO: display user info in dialog
@@ -137,6 +141,11 @@ export default function TabOneScreen() {
         status: action,
         timestamp: serverTimestamp()
       });
+
+      if (action === 'accepted') {
+        CreateChat(senderUid)
+        Alert.alert('Great job, you just broke the ice!', '', [{text: 'OK', onPress: () => setRefresh(refresh + 1)}])
+      }
     } catch (error) {
       console.error(error)
     }
@@ -169,10 +178,10 @@ export default function TabOneScreen() {
             {/* TODO: account for other notification types */}
             {item.type === 'friend-request' ?
               <>
-                <Text style={styles.header}> You have a friend request</Text>
-                <Text style={styles.message}> {'From ' + item.sender} </Text>
+                <Text style={styles.header}>You have a friend request!</Text>
+                <Text style={styles.message}>Ready to break the ice with <Text style={styles.messageHighlight}>{item.sender}</Text>?</Text>
                 <Pressable onPress={() => handleUserInfoRequest(item.sender)}>
-                  <Text style={styles.underline}> Learn More About User </Text>
+                  <Text style={styles.ref}>Click here to learn more about user</Text>
                 </Pressable>
                 <View style={styles.btngroup}>
                   <Button title='Accept' onPress={() => handleFriendRequestAction(item.sender, item.receiver, 'accepted')} />
