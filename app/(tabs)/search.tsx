@@ -76,7 +76,9 @@ export default function TabOneScreen() {
         const userData = friendsQuerySnapshot.docs[0].data();
         friends = userData?.friends;
       }
-      friends.forEach((friendUid: string) => setUserFriends(userFriends.add(friendUid)))
+      if (friends) {
+        friends.forEach((friendUid: string) => setUserFriends(userFriends.add(friendUid)))
+      }
 
 
       // Fetch their pending requests
