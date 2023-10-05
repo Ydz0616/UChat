@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, FlatList, Button, Pressable, Modal } from 'react-native';
+import { StyleSheet, FlatList, Button, Pressable, Modal, Alert } from 'react-native';
 import { Text, View } from '../../components/Themed';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
 import { collection, getDocs, query, where, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { CreateChat } from '../../components/Find';
 
 const styles = StyleSheet.create({
   container: {
@@ -87,6 +88,7 @@ const styles = StyleSheet.create({
 });
 
 export default function TabOneScreen() {
+  const [refresh, setRefresh] = useState(0)
   const [modalText, setModalText] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [userNotifications, setUserNotifications] = useState<any[]>([])
@@ -112,7 +114,7 @@ export default function TabOneScreen() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [refresh]);
 
   const handleUserInfoRequest = async (senderUid: string) => {
     // TODO: display user info in dialog
@@ -139,6 +141,11 @@ export default function TabOneScreen() {
         status: action,
         timestamp: serverTimestamp()
       });
+
+      if (action === 'accepted') {
+        CreateChat(senderUid)
+        Alert.alert('Great job, you just broke the ice!', '', [{text: 'OK', onPress: () => setRefresh(refresh + 1)}])
+      }
     } catch (error) {
       console.error(error)
     }

@@ -21,19 +21,18 @@ import { updateDoc, doc,addDoc, setDoc ,getDoc,  serverTimestamp, onSnapshot, co
 
   
 
-
-export async function SelectUser () { 
+// Attempt to create chat between current user and another user
+export async function CreateChat(otherUserUid: string) { 
         const db  = FIREBASE_DB;
         const currentUser = FIREBASE_AUTH.currentUser;
         // this is a static test example, we'll inpelement real examples
         // after the notification system is done
-        const uid = 'e0lkvGkocPUPJCvWbeZiq8SCv2o1'
     
         // check whether the group exists, if not, create
         if(currentUser?.uid){
-          const combinedID = currentUser?.uid> uid 
-          ? currentUser?.uid + uid 
-          : uid + currentUser?.uid;
+          const combinedID = currentUser?.uid> otherUserUid 
+          ? currentUser?.uid + otherUserUid 
+          : otherUserUid + currentUser?.uid;
          
           try{
             console.log(combinedID, '------------start-----------');
@@ -44,18 +43,18 @@ export async function SelectUser () {
      
               await setDoc(doc(db, 'chats',combinedID), {
                 id: combinedID,
-                users: [currentUser?.uid, uid],
+                users: [currentUser?.uid, otherUserUid],
                 messages: []
               })
               
               await setDoc(doc(db,'userchats', currentUser?.uid),{
                 [combinedID+".userInfo"]:{
-                  uid:uid
+                  uid:otherUserUid
                 },
                 [combinedID+".timestamp"]: serverTimestamp()
     
               })
-              await setDoc(doc(db,'userchats', uid),{
+              await setDoc(doc(db,'userchats', otherUserUid),{
                 [combinedID+".userInfo"]:{
                   uid:currentUser?.uid 
                 },

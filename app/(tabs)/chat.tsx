@@ -2,7 +2,6 @@ import { StyleSheet } from 'react-native';
 import EditScreenInfo from '../../components/EditScreenInfo';
 import { Text, View } from '../../components/Themed';
 import Message from '../../components/Message';
-import {SelectUser} from '../../components/Find';
 import React, { useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
@@ -14,7 +13,6 @@ export default function TabTwoScreen() {
   // Define a function to handle the button click and show the ChatPage
   const handleAcceptRequest = () => {
     console.log('Accepting request...');
-    SelectUser();
     setShowChat(true);
   };
 
