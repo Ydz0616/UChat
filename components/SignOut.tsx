@@ -21,6 +21,7 @@ export default function SignOut(props: SignOutProps) {
             },
             {
                 text: 'Sign Out',
+                style: 'destructive',
                 onPress: signOutFirebase
             },
         ]);
