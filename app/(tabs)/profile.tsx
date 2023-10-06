@@ -72,14 +72,16 @@ export default function TabThreeScreen({}) {
 
   if (isEditing) {
     return (
-      <EditProfile
-        titleText="Edit Profile"
-        includeKeyboardAvoidingView={true}
-        showCancel={true}
-        handleCancel={handleCancel}
-        saveProfileButtonText="Save Profile"
-        handleSaveProfile={handleSaveProfile}
-      />
+      <View style={styles.container}>
+        <EditProfile
+          titleText="Edit Profile"
+          includeKeyboardAvoidingView={true}
+          showCancel={true}
+          handleCancel={handleCancel}
+          saveProfileButtonText="Save Profile"
+          handleSaveProfile={handleSaveProfile}
+        />
+      </View>
     );
   }
   else {
@@ -113,7 +115,6 @@ const styles = StyleSheet.create({
   welcomeTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: 'white', 
   },
   details: {
     fontSize: 16,
