@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Alert, StyleSheet, Button, useColorScheme, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesomeButton } from '../components/Themed';
 import { ScrollView } from 'react-native'; 
 import { Text, View, TextInput } from './Themed';
 import { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH } from '../firebaseConfig';
@@ -132,7 +132,7 @@ export default function EditProfile(props: EditProfileProps) {
         <Text style={styles.editProfileTitle}>{titleText}</Text>
         <View style={styles.usernameContainer}>
           <Text style={styles.username}>{username}</Text>
-          <FontAwesome.Button
+          <FontAwesomeButton
             name="refresh" // Icon name for the swirly arrow (you can change this)
             backgroundColor="transparent"
             onPress={handleRegenerateUsername}
