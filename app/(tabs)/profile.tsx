@@ -5,6 +5,8 @@ import { getFirestore, collection, query, where, getDocs } from 'firebase/firest
 
 import { Text, View } from '../../components/Themed';
 import EditProfile from '../../components/EditProfile'
+import ResetPassword from '../../components/ResetPassword';
+import SignOut from '../../components/SignOut';
 
 export default function TabThreeScreen({}) {
   const firestore = getFirestore(FIREBASE_APP);
@@ -64,6 +66,10 @@ export default function TabThreeScreen({}) {
     setIsEditing(false)
   }
 
+  const handleChangeEmail = () => {
+    Alert.alert('Change Email', 'Unfortunately, you cannot change your email at this time. You may sign out and create a new account with a different email.')
+  }
+
   if (isEditing) {
     return (
       <EditProfile
@@ -84,6 +90,12 @@ export default function TabThreeScreen({}) {
         <Text style={[styles.details, { color: textColor }]}>Phone Number: {phoneNumber}</Text>
         <Text style={[styles.details, { color: textColor }]}>Email: {email}</Text>
         <Button title="Edit Profile" onPress={handleEditProfile} /> 
+        <View style={{height: 20}}></View>
+        <Button title="Change Email" onPress={handleChangeEmail} />
+        <View style={{height: 20}}></View>
+        { email ? <ResetPassword text="Reset Password" email={email} /> : null }
+        <View style={{height: 20}}></View>
+        <SignOut text="Sign Out" />
         {/* TODO: Change my email (display alert), change password, log out, delete account */}
       </View>
     );

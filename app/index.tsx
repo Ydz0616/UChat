@@ -15,14 +15,16 @@ import { Text, View, TextInput } from '../components/Themed'
 import { router } from 'expo-router';
 
 import {
-  getAuth,
   signInWithEmailAndPassword ,
   createUserWithEmailAndPassword,
   sendEmailVerification
 } from 'firebase/auth';  
 import { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH } from '../firebaseConfig';
 import 'firebase/firestore'
-import { doc,addDoc,collection, getDoc, setDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
+
+import ResetPassword from '../components/ResetPassword';
+
 enum AuthState {
   Undetermined,
   EnterEmailPassword,
@@ -92,34 +94,22 @@ export default function Index() {
     } catch (error: any) {
       switch (error.code) {
         case 'auth/invalid-email':
-          Alert.alert("Invalid Email", "Please enter a valid Duke email address. Do not include @duke.edu; it will be added automatically.", [
-            {text: "Ok"}
-          ]);
+          Alert.alert("Invalid Email", "Please enter a valid Duke email address. Do not include '@duke.edu'. It will be added automatically.");
           return;
         case 'auth/user-disabled':
-          Alert.alert("Account Disabled", "Your account has been disabled. Please contact an administrator.", [
-            {text: "Ok"}
-          ]);
+          Alert.alert("Account Disabled", "Your account has been disabled. Please contact an administrator.");
           return;
         case 'auth/user-not-found':
-          Alert.alert("Account Not Found", "An account with this email address does not exist.", [
-            {text: "Ok"}
-          ]);
+          Alert.alert("Account Not Found", "An account with this email address does not exist.");
           return;
         case 'auth/wrong-password':
-          Alert.alert("Incorrect Password", "The password you entered is incorrect.", [
-            {text: "Ok"}
-          ]);
+          Alert.alert("Incorrect Password", "The password you entered is incorrect.");
           return;
         case 'auth/invalid-login-credentials':
-          Alert.alert("Invalid Login Credentials", "Please enter a valid Duke email address and password.", [
-            {text: "Ok"}
-          ]);
+          Alert.alert("Invalid Login Credentials", "Please enter a valid Duke email address and password.");
           return;
         default:
-          Alert.alert("Error", "There was an error when attempting to log in. Please try again.", [
-            {text: "Ok"}
-          ]);
+          Alert.alert("Error", "There was an error when attempting to log in. Please try again.");
           return;
       }
     }
@@ -137,25 +127,17 @@ export default function Index() {
     } catch (error:any) {
       switch (error.code) {
         case 'auth/email-already-in-use':
-          Alert.alert("Account Exists", "An account with this email address already exists.", [
-            {text: "Ok"}
-          ]);
+          Alert.alert("Account Exists", "An account with this email address already exists.");
           return;
         case 'auth/invalid-email':
-          Alert.alert("Invalid Email", "Please enter a valid Duke email address. Do not include @duke.edu; it will be added automatically.", [
-            {text: "Ok"}
-          ]);
+          Alert.alert("Invalid Email", "Please enter a valid Duke email address. Do not include '@duke.edu'. It will be added automatically.");
           return;
         case 'auth/weak-password':
-          Alert.alert("Weak Password", "Your password is not strong enough. It must contain at least six characters.", [
-            {text: "Ok"}
-          ]);
+          Alert.alert("Weak Password", "Your password is not strong enough. It must contain at least six characters.");
           return;
         case 'auth/operation-not-allowed':
         default:
-          Alert.alert("Error", "There was an error when attempting to create your account. Please try again.", [
-            {text: "Ok"}
-          ]);
+          Alert.alert("Error", "There was an error when attempting to create your account. Please try again.");
           return;
       }
     }
@@ -168,9 +150,7 @@ export default function Index() {
     await user.reload();
 
     if (!user.emailVerified) {
-      Alert.alert("Email Not Verified", "Your email has not yet been verified. Please check your email for a verification link.", [
-        {text: "Ok"}
-      ]);
+      Alert.alert("Email Not Verified", "Your email has not yet been verified. Please check your email for a verification link.");
       return;
     }
 
@@ -227,6 +207,7 @@ export default function Index() {
             <View style={{flex: 1}}></View>
             <Button title="Create Account" onPress={handleCreateAccount}/>
           </View>
+          <ResetPassword text="Forgot Password?" email={email + EMAIL_DOMAIN} />
         </View>
       );
       case AuthState.VerifyEmail: return (
