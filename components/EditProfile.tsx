@@ -7,6 +7,8 @@ import { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH } from '../firebaseConfig';
 import { getFirestore, collection, addDoc, query, where, updateDoc, getDocs } from 'firebase/firestore';
 
 interface EditProfileProps {
+  titleText: string;
+  includeKeyboardAvoidingView: boolean;
   showCancel: boolean;
   handleCancel?: () => void;
   saveProfileButtonText: string;
@@ -14,7 +16,7 @@ interface EditProfileProps {
 }
 
 export default function EditProfile(props: EditProfileProps) {
-  const { showCancel, handleCancel, saveProfileButtonText, handleSaveProfile } = props;
+  const { titleText, includeKeyboardAvoidingView, showCancel, handleCancel, saveProfileButtonText, handleSaveProfile } = props;
   
   const firestore = getFirestore(FIREBASE_APP);
   const colorScheme = useColorScheme();
@@ -67,6 +69,10 @@ export default function EditProfile(props: EditProfileProps) {
       updateProfileData();
     }
 
+    if (username === '') {
+      setUsername(generateRandomUsername());
+    }
+
   }, []);
 
   const saveProfile = async () => {
@@ -84,50 +90,46 @@ export default function EditProfile(props: EditProfileProps) {
           return;
         }
   
-        // Query Firestore to check if the user's UID already exists
-      const querySnapshot = await getDocs(
-        query(collection(firestore, 'users'), where('uid', '==', user.uid))
-      );
+          // Query Firestore to check if the user's UID already exists
+        const querySnapshot = await getDocs(
+          query(collection(firestore, 'users'), where('uid', '==', user.uid))
+        );
 
-      if (querySnapshot.docs.length > 0) {
-        // User's UID already exists; update the existing document
-        const existingDocRef = querySnapshot.docs[0].ref;
-        await updateDoc(existingDocRef, {
-          username: username,
-          classYear: classYear,
-          major: major,
-          hobbies: hobbies.map(hobby => hobby.trim()), // Assuming hobbies is a comma-separated list
-          phoneNumber: phoneNumber
-        });
-      } 
-      else {
-        // User's UID doesn't exist; create a new document
-        await addDoc(collection(firestore, 'users'), {
-          uid: user.uid,
-          username: username,
-          classYear: classYear,
-          major: major,
-          hobbies: hobbies.map(hobby => hobby.trim()),
-          phoneNumber: phoneNumber
-        });
-      }
-        console.log(hobbies.map(hobby => hobby.trim()))
-        console.log(user);
+        if (querySnapshot.docs.length > 0) {
+          // User's UID already exists; update the existing document
+          const existingDocRef = querySnapshot.docs[0].ref;
+          await updateDoc(existingDocRef, {
+            username: username,
+            classYear: classYear,
+            major: major,
+            hobbies: hobbies.map(hobby => hobby.trim()), // Assuming hobbies is a comma-separated list
+            phoneNumber: phoneNumber
+          });
+        } 
+        else {
+          // User's UID doesn't exist; create a new document
+          await addDoc(collection(firestore, 'users'), {
+            uid: user.uid,
+            username: username,
+            classYear: classYear,
+            major: major,
+            hobbies: hobbies.map(hobby => hobby.trim()),
+            phoneNumber: phoneNumber
+          });
+        }
       } else {
-        console.log("User not signed in.");
+        console.error("User not signed in.");
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
 
     handleSaveProfile();
   };
-  return (
-    <KeyboardAvoidingView behavior="padding" style={styles.container}>
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-    <ScrollView contentContainerStyle={styles.container}>
+
+  const body = (
     <View>
-        <Text style={styles.editProfileTitle}>Edit Profile</Text>
+        <Text style={styles.editProfileTitle}>{titleText}</Text>
         <View style={styles.usernameContainer}>
           <Text style={styles.username}>{username}</Text>
           <FontAwesome.Button
@@ -139,7 +141,7 @@ export default function EditProfile(props: EditProfileProps) {
         
         <TextInput
         placeholder="Class Year"
-        value={classYear.toString()} // Convert the number to a string for the input value
+        value={classYear == 0 ? '' : classYear.toString()} // Convert the number to a string for the input value
         onChangeText={(text) => {
             const parsedValue = parseInt(text, 10); // Parse the input as an integer
             if (!isNaN(parsedValue)) {
@@ -178,10 +180,22 @@ export default function EditProfile(props: EditProfileProps) {
           <Button title={saveProfileButtonText} onPress={saveProfile}/>
         </View>
     </View>
-    </ScrollView>
-    </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
-  );
+  )
+
+  if (includeKeyboardAvoidingView) {
+    return (
+      <KeyboardAvoidingView behavior="padding" style={styles.container}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <ScrollView contentContainerStyle={styles.container}>
+        {body}
+      </ScrollView>
+      </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    );
+  }
+  else {
+    return body;
+  }
 }
 
 const styles = StyleSheet.create({

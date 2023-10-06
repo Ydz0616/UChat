@@ -73,6 +73,8 @@ export default function TabThreeScreen({}) {
   if (isEditing) {
     return (
       <EditProfile
+        titleText="Edit Profile"
+        includeKeyboardAvoidingView={true}
         showCancel={true}
         handleCancel={handleCancel}
         saveProfileButtonText="Save Profile"
