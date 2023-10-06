@@ -21,9 +21,10 @@ import {
 } from 'firebase/auth';  
 import { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH } from '../firebaseConfig';
 import 'firebase/firestore'
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 import ResetPassword from '../components/ResetPassword';
+import EditProfile from '../components/EditProfile';
 
 enum AuthState {
   Undetermined,
@@ -41,6 +42,7 @@ export default function Index() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const db = FIREBASE_DB;
+  
   FIREBASE_AUTH.onAuthStateChanged((user) => {
     if (authState == AuthState.Undetermined) {
       if (user) { 
@@ -54,33 +56,16 @@ export default function Index() {
   })
 
   const checkIfProfileExists = async () => {
-    // TODO: check if profile exists; if not, setAuthState(AuthState.CreateProfile); if so,
-    router.replace(HOME_PAGE)
-
     const user = FIREBASE_AUTH.currentUser;
-   
-
-    // one possible implementation
-    // if(user){
-    //   const docRef = doc(db, "users", user.uid);
-    //   const docSnap = await getDoc(docRef);
-    //   if (docSnap.exists()) {
-    //     router.replace(HOME_PAGE);
-    //   } else {
-    //     setAuthState(AuthState.CreateProfile);
-    //   }
-
-    // }
-    
-    // implementation ends here
-
-
-    // const userDoc = await FIREBASE_DB.collection('users').doc(user.uid).get();
-    // if (userDoc.exists) {
-    //   router.replace(HOME_PAGE);
-    // } else {
-    //   setAuthState(AuthState.CreateProfile);
-    // }
+    if(user){
+      const docRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        router.replace(HOME_PAGE);
+      } else {
+        setAuthState(AuthState.CreateProfile);
+      }
+    }
   }
 
   const handleLogin = async () => {
@@ -89,8 +74,6 @@ export default function Index() {
     try {
       await signInWithEmailAndPassword(FIREBASE_AUTH, fullEmail, password);
       const user = FIREBASE_AUTH.currentUser;
-      console.log(user);
-      // router.replace(HOME_PAGE)
     } catch (error: any) {
       switch (error.code) {
         case 'auth/invalid-email':
@@ -154,29 +137,14 @@ export default function Index() {
       return;
     }
 
-    // TODO: Display create profile component
-    // setAuthState(AuthState.CreateProfile)
-
-    // create user profile
-    await setDoc(doc(db,'users',user.uid),{
-      uid: user.uid,
-      classYear: '',
-      major: '',
-      hobbies: [],
-      phoneNumber: '',
-      username:''
-      // profilePicture: ''
-
-    })
-    // create user chat
-    await setDoc(doc(db,'userchats',user.uid),{})
-    
- 
-    router.replace(HOME_PAGE)
+    setAuthState(AuthState.CreateProfile)
   }
 
-  const handleCreateProfile = () => {
-    console.log("Create Profile")
+  const handleCreateProfile = async () => {
+    // create user chat
+    const user = FIREBASE_AUTH.currentUser!;
+    await setDoc(doc(db, 'userchats', user.uid),{})
+    
     router.replace(HOME_PAGE)
   }
   
@@ -212,16 +180,20 @@ export default function Index() {
       );
       case AuthState.VerifyEmail: return (
         <View>
-          <Text>Please check your email for a verification link.</Text>
+          <Text style={{textAlign: "center"}}>Please check '{email + EMAIL_DOMAIN}' for a verification link.</Text>
           <View style={{height: 20}}></View>
           <Button title="I've Verified My Email" onPress={handleVerifyEmail}/>
         </View> 
       );
       case AuthState.CreateProfile: return (
-        // TODO: Add create profile component
         <View>
-          <Text>Create Profile</Text>
-          <Button title="Create Profile" onPress={handleCreateProfile}/>
+          <EditProfile
+            titleText='Create Profile'
+            includeKeyboardAvoidingView={false}
+            showCancel={false}
+            saveProfileButtonText='Create Profile'
+            handleSaveProfile={handleCreateProfile}
+          />
         </View>
       );
       default: return null;
