@@ -207,7 +207,6 @@ const styles = StyleSheet.create({
   editProfileTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: 'white',
   },
   input: {
     borderWidth: 1,
