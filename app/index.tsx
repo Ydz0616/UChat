@@ -21,7 +21,7 @@ import {
 } from 'firebase/auth';  
 import { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH } from '../firebaseConfig';
 import 'firebase/firestore'
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDocs, query, where, collection } from 'firebase/firestore';
 
 import ResetPassword from '../components/ResetPassword';
 import EditProfile from '../components/EditProfile';
@@ -42,6 +42,7 @@ export default function Index() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const db = FIREBASE_DB;
+  const firestore = getFirestore(FIREBASE_APP);
   
   FIREBASE_AUTH.onAuthStateChanged((user) => {
     if (authState == AuthState.Undetermined) {
@@ -57,15 +58,19 @@ export default function Index() {
 
   const checkIfProfileExists = async () => {
     const user = FIREBASE_AUTH.currentUser;
-    if(user){
-      const docRef = doc(db, "users", user.uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        router.replace(HOME_PAGE);
-      } else {
-        setAuthState(AuthState.CreateProfile);
+    if (user) {
+      try {
+        const querySnapshot = await getDocs(
+          query(collection(firestore, 'users'), where('uid', '==', user!.uid))
+        );
+        if (querySnapshot.docs.length > 0) {
+          router.replace(HOME_PAGE);
+        }
+      } catch (error) {
+        console.error(error);
       }
     }
+    setAuthState(AuthState.CreateProfile);
   }
 
   const handleLogin = async () => {
