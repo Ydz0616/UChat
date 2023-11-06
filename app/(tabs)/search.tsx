@@ -35,7 +35,6 @@ const styles = StyleSheet.create({
   },
   nameText: {
     fontSize: 20, // Set the font size to make the name larger
-    color: 'black', // Set the color to blue
     fontWeight: 'bold', // Optionally, you can make the text bold
   },
   redirect: {
