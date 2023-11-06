@@ -94,16 +94,18 @@ export default function TabOneScreen() {
 
       // Fetch all users where hobbies match search term
       const searchTermSplit = searchTerm.split(',').map(term => term.trim().toLowerCase());
-      const q = searchTerm == '' ? query(users) : query(users, where('hobbies', 'array-contains-any', searchTermSplit));
+      const q = searchTerm == '' ?
+            query(users, where('uid', '!=', user!.uid)) : 
+            query(users, where('hobbies', 'array-contains-any', searchTermSplit), where('uid', '!=', user!.uid));
       const usersQuerySnapshot = await getDocs(q);
 
       const hobbiesData: Person[] = [];
       usersQuerySnapshot.forEach((doc) => {
-        const user = doc.data();
+        const queryUser = doc.data();
         hobbiesData.push({
-          uid: user.uid,
-          username: user.username,
-          hobbies: user.hobbies === null ? ['No Hobbies'] : user.hobbies,
+          uid: queryUser.uid,
+          username: queryUser.username,
+          hobbies: queryUser.hobbies === null ? ['No Hobbies'] : queryUser.hobbies,
         });
       });
       setUserHobbies(hobbiesData);
