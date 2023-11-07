@@ -5,6 +5,8 @@ import { ScrollView } from 'react-native';
 import { Text, View, TextInput } from './Themed';
 import { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH } from '../firebaseConfig';
 import { getFirestore, collection, addDoc, query, where, updateDoc, getDocs } from 'firebase/firestore';
+import ProfilePicture from './ProfilePicture';
+import { getRandomProfilePicture } from './ProfilePicture';
 
 interface EditProfileProps {
   titleText: string;
@@ -27,6 +29,7 @@ export default function EditProfile(props: EditProfileProps) {
   const [major, setMajor] = useState('');
   const [hobbies, setHobbies] = useState<string[]>([]);
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [profilePicture, setProfilePicture] = useState('https://firebasestorage.googleapis.com/v0/b/icebreaker-16bc6.appspot.com/o/default.png?alt=media&token=896c58fb-f80a-4664-bc82-b12727ccb541');
   
   const auth  = FIREBASE_AUTH;
   const db = FIREBASE_DB;
@@ -39,7 +42,10 @@ export default function EditProfile(props: EditProfileProps) {
     const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
     return `${randomAdjective} ${randomNoun}`;
   };
-
+  const updateProfilePicture = () => {
+    const newProfilePicture = getRandomProfilePicture();
+    setProfilePicture(newProfilePicture);
+  };
   const handleRegenerateUsername = () => {
     setUsername(generateRandomUsername());
   };
@@ -58,6 +64,7 @@ export default function EditProfile(props: EditProfileProps) {
           setMajor(userData.major);
           setHobbies(userData.hobbies); // Convert the array back to a string
           setPhoneNumber(userData.phoneNumber);
+          setProfilePicture(userData.profilepic);
         }
       } catch (error) {
         console.error(error);
@@ -103,7 +110,8 @@ export default function EditProfile(props: EditProfileProps) {
             classYear: classYear,
             major: major,
             hobbies: hobbies.map(hobby => hobby.trim()), // Assuming hobbies is a comma-separated list
-            phoneNumber: phoneNumber
+            phoneNumber: phoneNumber,
+            profilepic: profilePicture
           });
         } 
         else {
@@ -114,7 +122,8 @@ export default function EditProfile(props: EditProfileProps) {
             classYear: classYear,
             major: major,
             hobbies: hobbies.map(hobby => hobby.trim()),
-            phoneNumber: phoneNumber
+            phoneNumber: phoneNumber,
+            profilepic: profilePicture
           });
         }
       } else {
@@ -130,6 +139,12 @@ export default function EditProfile(props: EditProfileProps) {
   const body = (
     <View>
         <Text style={styles.editProfileTitle}>{titleText}</Text>
+        <ProfilePicture profilePicture={profilePicture} />
+        <FontAwesomeButton
+            name="refresh" // Icon name for the swirly arrow (you can change this)
+            backgroundColor="transparent"
+            onPress={updateProfilePicture}
+          />
         <View style={styles.usernameContainer}>
           <Text style={styles.username}>{username}</Text>
           <FontAwesomeButton

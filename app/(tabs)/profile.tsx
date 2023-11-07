@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, StyleSheet, Button, useColorScheme } from 'react-native';
+import { Alert, StyleSheet, Button, useColorScheme, Image } from 'react-native';
 import { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 
@@ -7,6 +7,7 @@ import { Text, View } from '../../components/Themed';
 import EditProfile from '../../components/EditProfile'
 import ResetPassword from '../../components/ResetPassword';
 import SignOut from '../../components/SignOut';
+import ProfilePicture from '../../components/ProfilePicture';
 
 export default function TabThreeScreen({}) {
   const firestore = getFirestore(FIREBASE_APP);
@@ -20,8 +21,8 @@ export default function TabThreeScreen({}) {
   const [hobbies, setHobbies] = useState<string[]>([]);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
+  const [profilePicture, setProfilePicture] = useState('');
   const [profileSaveCount, setProfileSaveCount] = useState(0);
-
   const auth  = FIREBASE_AUTH;
   const db = FIREBASE_DB;
 
@@ -40,6 +41,9 @@ export default function TabThreeScreen({}) {
           setHobbies(userData.hobbies); // Convert the array back to a string
           setPhoneNumber(userData.phoneNumber);
           setEmail(user!.email ?? '');
+          setProfilePicture(userData.profilepic ? userData.profilepic :
+             'https://firebasestorage.googleapis.com/v0/b/icebreaker-16bc6.appspot.com/o/default.png?alt=media&token=896c58fb-f80a-4664-bc82-b12727ccb541');
+
         }
       } catch (error) {
         console.error(error);
@@ -87,6 +91,7 @@ export default function TabThreeScreen({}) {
   else {
     return (
       <View style={styles.container}>
+        <ProfilePicture profilePicture={profilePicture} />
         <Text style={styles.welcomeTitle}>Hello, {username}!</Text>
         <Text style={[styles.details, { color: textColor }]}>Class Year: {classYear}</Text>
         <Text style={[styles.details, { color: textColor }]}>Major: {major}</Text>

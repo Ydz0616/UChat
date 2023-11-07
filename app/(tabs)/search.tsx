@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, FlatList, Pressable, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, FlatList, Pressable, Alert, ActivityIndicator, Image } from 'react-native';
 import { Text, View, TextInput } from '../../components/Themed';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
 import { collection, getDocs, setDoc,query, where, serverTimestamp, addDoc,doc, or } from 'firebase/firestore';
@@ -8,6 +8,7 @@ interface Person {
   uid: string;
   username: string;
   hobbies: string[];
+  profilePicture: string;
 }
 const styles = StyleSheet.create({
   container: {
@@ -47,6 +48,19 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     color: 'gray',
   },
+  userInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  profilePicture: {
+    width: 40, // Adjust the width and height as needed
+    height: 40,
+    borderRadius: 20, // Make it circular
+    marginRight: 10, // Add some spacing to the right of the picture
+  },
+  userInfoText: {
+    flex: 1,
+  },
 });
 
 export default function TabOneScreen() {
@@ -56,7 +70,7 @@ export default function TabOneScreen() {
   const [userHobbies, setUserHobbies] = useState<Person[]>([]);
   const [userFriends, setUserFriends] = useState(new Set())
   const [pendingRequests, setPendingRequest] = useState(new Set())
-
+  const [profilePicture, setProfilePicture] = useState('');
   const user = FIREBASE_AUTH.currentUser;
   const fetchData = async () => {
     setIsLoading(true)
@@ -78,7 +92,7 @@ export default function TabOneScreen() {
       if (friends) {
         friends.forEach((friendUid: string) => setUserFriends(userFriends.add(friendUid)))
       }
-
+      
 
       // Fetch their pending requests
       const requestQuerySnapshot = await getDocs(
@@ -106,8 +120,11 @@ export default function TabOneScreen() {
           uid: queryUser.uid,
           username: queryUser.username,
           hobbies: queryUser.hobbies === null ? ['No Hobbies'] : queryUser.hobbies,
+          profilePicture: queryUser.profilepic || 'https://firebasestorage.googleapis.com/v0/b/icebreaker-16bc6.appspot.com/o/default.png?alt=media&token=896c58fb-f80a-4664-bc82-b12727ccb541',
         });
       });
+
+      
       setUserHobbies(hobbiesData);
 
       setIsLoading(false)
@@ -159,35 +176,40 @@ export default function TabOneScreen() {
         onSubmitEditing={fetchData}
         onChangeText={setSearchTerm}
         value={searchTerm}
-        returnKeyType='search'
+        returnKeyType="search"
       />
-      {isLoading ?
+      {isLoading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator animating={true} size={'large'} color={'black'} />
+          <ActivityIndicator animating={true} size="large" color="black" />
         </View>
-        : null}
-      {userHobbies.length > 0 && !isLoading ?
+      ) : null}
+      {userHobbies.length > 0 && !isLoading ? (
         <FlatList
           data={userHobbies}
           renderItem={({ item }) => (
             <View style={styles.resultContainer}>
-              <Text style={styles.nameText}>{item.username}</Text>
-              <Text>{item.hobbies.join(', ')}</Text>
-              {/* change option depending on friend and potential request status */}
-              {userFriends.has(item.uid) ? <Text style={styles.status}>Already friends!</Text> :
-                pendingRequests.has(item.uid) ? <Text style={styles.status}>Friend request pending...</Text> :
-                  item.username ?
-                    <Pressable onPress={() => handleUserRequestAction(item.username, item.uid)}>
-                      <Text style={styles.redirect}>Send friend request</Text>
-                    </Pressable> :
-                    null
-              }
+              <View style={styles.userInfoContainer}>
+                <Image source={{ uri: item.profilePicture }} style={styles.profilePicture} />
+                <View style={styles.userInfoText}>
+                  <Text style={styles.nameText}>{item.username}</Text>
+                  <Text>{item.hobbies.join(', ')}</Text>
+                  {/* Change option depending on friend and potential request status */}
+                  {userFriends.has(item.uid) ? <Text style={styles.status}>Already friends!</Text> :
+                    pendingRequests.has(item.uid) ? <Text style={styles.status}>Friend request pending...</Text> :
+                      item.username ? (
+                        <Pressable onPress={() => handleUserRequestAction(item.username, item.uid)}>
+                          <Text style={styles.redirect}>Send friend request</Text>
+                        </Pressable>
+                      ) : null
+                  }
+                </View>
+              </View>
             </View>
           )}
-          keyExtractor={item => item.uid}
+          keyExtractor={(item) => item.uid}
         />
-        : null}
-
+      ) : null}
     </View>
   );
+  
 }
