@@ -29,15 +29,16 @@ export default function EditProfile(props: EditProfileProps) {
   const [classYear, setClassYear] = useState(0);;
 
   const [open, setOpen] = useState(false);
-  const [major,setMajor] = useState(null);
+  const [major, setMajor] = useState(null);
   const [majors, setItems] = useState([
-        {label: 'Computer Science', value: 'cs'},
-        {label: 'Electrical Engineering', value: 'ee'}
-               ]);
-  
+    { label: 'Computer Science', value: 'cs' },
+    { label: 'Electrical Engineering', value: 'ee' }
+  ]);
+
   const [hobbies, setHobbies] = useState<string[]>([]);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [profilePicture, setProfilePicture] = useState('https://firebasestorage.googleapis.com/v0/b/icebreaker-16bc6.appspot.com/o/default.png?alt=media&token=896c58fb-f80a-4664-bc82-b12727ccb541');
+
 
   const auth = FIREBASE_AUTH;
   const db = FIREBASE_DB;
@@ -100,7 +101,7 @@ export default function EditProfile(props: EditProfileProps) {
         // Check if any required field is empty
         if (!classYear || !major || !hobbies || !phoneNumber) {
           Alert.alert("Not all of the fields are filled.", "Please fill in the fields.", [
-            { text: "Ok" }
+            {  text: "Ok"  }
           ]);
           return;
         }
@@ -154,7 +155,7 @@ export default function EditProfile(props: EditProfileProps) {
       // Remove hobby if text is completely deleted
       updatedHobbies.splice(idx, 1)
     }
-    
+
     setHobbies(updatedHobbies)
   }
 
@@ -189,25 +190,17 @@ export default function EditProfile(props: EditProfileProps) {
         }}
         keyboardType="numeric" // Use a numeric keyboard
         style={[styles.input, { color: textColor }]}
-        />
-        
-        <DropDownPicker
-            open={open}
-            value={major}
-            items={majors}
-            setOpen={setOpen}
-            setValue={setMajor}
-            setItems={setItems}
-            style={[styles.input, { backgroundColor: 'white', borderColor: 'gray' }]} 
-            />    
-        {/* <TextInput
-        placeholder="Hobbies"
-        value={hobbies.join(',')}
-        onChangeText={(text) => setHobbies(text.split(','))}
-        style={[styles.input, { color: textColor }]}
-        />
-        <TextInput
-      /> */}
+      />
+
+      <DropDownPicker
+        open={open}
+        value={major}
+        items={majors}
+        setOpen={setOpen}
+        setValue={setMajor}
+        setItems={setItems}
+        style={[styles.input, { backgroundColor: 'white', borderColor: 'gray' }]}
+      />
 
       <View style={[styles.input]}>
         <View style={styles.hobbiesContainer}>
@@ -292,7 +285,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   hobbiesContainer: {
-    flexDirection: 'row', 
+    flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-around'
   },
