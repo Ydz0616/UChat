@@ -7,7 +7,7 @@ import { Text, View } from '../../components/Themed';
 import EditProfile from '../../components/EditProfile'
 import ResetPassword from '../../components/ResetPassword';
 import SignOut from '../../components/SignOut';
-import ProfilePicture from '../../components/ProfilePicture';
+import ProfilePicture, { defaultProfilePictureURL } from '../../components/ProfilePicture';
 
 export default function TabThreeScreen({}) {
   const firestore = getFirestore(FIREBASE_APP);
@@ -42,7 +42,7 @@ export default function TabThreeScreen({}) {
           setPhoneNumber(userData.phoneNumber);
           setEmail(user!.email ?? '');
           setProfilePicture(userData.profilepic ? userData.profilepic :
-             'https://firebasestorage.googleapis.com/v0/b/icebreaker-16bc6.appspot.com/o/default.png?alt=media&token=896c58fb-f80a-4664-bc82-b12727ccb541');
+             defaultProfilePictureURL);
 
         }
       } catch (error) {
@@ -91,7 +91,7 @@ export default function TabThreeScreen({}) {
   else {
     return (
       <View style={styles.container}>
-        <ProfilePicture profilePicture={profilePicture} />
+        <ProfilePicture profilePicture={profilePicture || defaultProfilePictureURL} />
         <Text style={styles.welcomeTitle}>Hello, {username}!</Text>
         <Text style={[styles.details, { color: textColor }]}>Class Year: {classYear}</Text>
         <Text style={[styles.details, { color: textColor }]}>Major: {major}</Text>

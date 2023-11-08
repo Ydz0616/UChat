@@ -13,6 +13,8 @@ const possibleProfilePictures = [
   'https://firebasestorage.googleapis.com/v0/b/icebreaker-16bc6.appspot.com/o/soyjak3.png?alt=media&token=a3e184d3-28cd-4cc5-ba20-927edf2233b2'
   // Add more profile picture URLs
 ];
+export const defaultProfilePictureURL =
+  'https://firebasestorage.googleapis.com/v0/b/icebreaker-16bc6.appspot.com/o/default.png?alt=media&token=896c58fb-f80a-4664-bc82-b12727ccb541';
 
 export const getRandomProfilePicture = () => {
     const randomIndex = Math.floor(Math.random() * possibleProfilePictures.length);
@@ -20,6 +22,8 @@ export const getRandomProfilePicture = () => {
   };  
 
 const ProfilePicture: React.FC<ProfilePictureProps> = ({ profilePicture }) => {
+  const imageUrl = profilePicture ? profilePicture : defaultProfilePictureURL;
+
   return (
     <View style={styles.container}>
       <Image
