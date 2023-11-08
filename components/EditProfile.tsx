@@ -39,6 +39,7 @@ export default function EditProfile(props: EditProfileProps) {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [profilePicture, setProfilePicture] = useState('https://firebasestorage.googleapis.com/v0/b/icebreaker-16bc6.appspot.com/o/default.png?alt=media&token=896c58fb-f80a-4664-bc82-b12727ccb541');
 
+
   const auth = FIREBASE_AUTH;
   const db = FIREBASE_DB;
 
@@ -100,7 +101,7 @@ export default function EditProfile(props: EditProfileProps) {
         // Check if any required field is empty
         if (!classYear || !major || !hobbies || !phoneNumber) {
           Alert.alert("Not all of the fields are filled.", "Please fill in the fields.", [
-            { text: "Ok" }
+            {  text: "Ok"  }
           ]);
           return;
         }
