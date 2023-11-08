@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-
+import EditScreenInfo from  '../components/EditScreenInfo';
 import {
   View,
   Text,
@@ -15,24 +15,16 @@ import {
 import { FIREBASE_DB, FIREBASE_AUTH, FIREBASE_APP } from '../firebaseConfig';
 import { updateDoc, doc,arrayUnion, setDoc, addDoc ,getDoc, collection, serverTimestamp, onSnapshot, Timestamp } from '@firebase/firestore';
 
-const Message = () => {
+const Message = (_uid:any) => {
+  
   const db  = FIREBASE_DB;
   const currentUser = FIREBASE_AUTH.currentUser;
-  
-  const  [messages, setMessages] = useState([{id:null, text:null, sender_id:null}])
-  // this is a static test example, we'll inpelement real examples
-  // after the notification system is done
-  var uid = 'oZQGZ4SFlhXSNNJgUhRgDw9hhEa2' // Yuandong
-  if ( currentUser?.uid == uid) {
-    uid = '4YBkAgcj3gYwDkJtZ21dmukexKo1' // Jordan
-  }
-  const combinedID = currentUser?.uid! > uid 
-  ? currentUser?.uid + uid 
-  : uid + currentUser?.uid;
+  const combinedID = currentUser?.uid! > _uid 
+  ? currentUser?.uid + _uid 
+  : _uid + currentUser?.uid;
   const flatListRef = useRef<FlatList | null>(null);
-  
   const [newMessage, setNewMessage] = useState('');
-
+  const  [messages, setMessages] = useState()
   useEffect(() => {
     const unSub = onSnapshot(doc(db, "chats", combinedID), (doc) => {
       doc.exists() && setMessages(doc.data().messages);
@@ -48,9 +40,7 @@ const Message = () => {
     }
     if(currentUser?.uid){
       try{
-        const combinedID = currentUser?.uid> uid 
-          ? currentUser?.uid + uid 
-          : uid + currentUser?.uid;
+        
         const newMessageObj = { id: Timestamp.now(), text: newMessage, sender_id:currentUser?.uid};
         await updateDoc(doc(db,'chats',combinedID),{
           messages:arrayUnion(newMessageObj)
@@ -73,15 +63,9 @@ const Message = () => {
 
 
 
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      
-      <View style={styles.userHeader}>
-        {/* write a button with the selectuser event */}  
-      {/* <Image source={userAvatar} style={styles.avatar} /> */}
-      {/* <Text style={styles.userName}>{userName}</Text> */}
-    </View>
+
       <FlatList
         data={messages}
         // keyExtractor={(item) => item.id}
@@ -131,6 +115,7 @@ const Message = () => {
 
 
 const styles = StyleSheet.create({
+  
   userHeader: {
     flexDirection: 'row',
     alignItems: 'center',

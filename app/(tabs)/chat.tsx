@@ -2,18 +2,56 @@ import { StyleSheet } from 'react-native';
 import EditScreenInfo from '../../components/EditScreenInfo';
 import { Text, View } from '../../components/Themed';
 import Message from '../../components/Message';
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
-
+import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
+import { collection, getDocs, query, where, serverTimestamp, updateDoc, onSnapshot } from 'firebase/firestore';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 export default function TabTwoScreen() {
   const [showChat, setShowChat] = useState(false);
+  const db  = FIREBASE_DB;
+  const currentUser = FIREBASE_AUTH.currentUser;
+  const fetchData = async () => {
+    
+    try {
+      console.log('running')
+      const notificationsRef = collection(FIREBASE_DB, 'chats');
+      // the queryRef should be the doc that the current user is in the users array and the chatting is ture
+      const queryRef = query(notificationsRef, where('users', 'array-contains', currentUser?.uid),where('chatting','==',true));
+
+      const eventlistener = onSnapshot(queryRef, (querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          console.log('the data of the doc',doc.data())
+          setShowChat(true);
+        })
+        if(querySnapshot.empty){
+          console.log('empty')  
+        }
+      });
+      return () => {
+        // Unsubscribe from the snapshot listener when component unmounts
+        eventlistener();
+      };
+    } catch (error) {
+
+    }
+  }
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   // Define a function to handle the button click and show the ChatPage
   const handleAcceptRequest = () => {
-    console.log('Accepting request...');
-    setShowChat(true);
+    //TODO:  navigate to the search page
+    console.log('navigating')
+    // Please COMMENT BELOW when implemented the navigation
+    setShowChat(true)
+
+
+   
   };
 
   return (
@@ -23,14 +61,11 @@ export default function TabTwoScreen() {
       ) : (
         <View>
           <Text style={styles.messageText}>
-            You confirmed the friend request from{' '}
-            <Text style={styles.senderText}> Happy Cat </Text>. 
-
-            Go Break the Ice!
+            Oops~ Looks Like You Don't Have a Chat Yet.
           </Text>    
           {/* <View> <GetUser></GetUser></View> */}
           <TouchableOpacity onPress={handleAcceptRequest} style={styles.button}>
-            <Text style={styles.buttonText}>Start</Text>
+            <Text style={styles.buttonText}>Find A Friend</Text>
           
           </TouchableOpacity>
         </View>

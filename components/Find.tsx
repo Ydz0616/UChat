@@ -25,17 +25,12 @@ import { updateDoc, doc,addDoc, setDoc ,getDoc,  serverTimestamp, onSnapshot, co
 export async function CreateChat(otherUserUid: string) { 
         const db  = FIREBASE_DB;
         const currentUser = FIREBASE_AUTH.currentUser;
-        // this is a static test example, we'll inpelement real examples
-        // after the notification system is done
-    
-        // check whether the group exists, if not, create
         if(currentUser?.uid){
           const combinedID = currentUser?.uid> otherUserUid 
           ? currentUser?.uid + otherUserUid 
           : otherUserUid + currentUser?.uid;
          
           try{
-
             const res = await getDoc(doc(db, 'chats', combinedID));
             console.log(res);
             if(!res.exists()){
@@ -44,7 +39,8 @@ export async function CreateChat(otherUserUid: string) {
               await setDoc(doc(db, 'chats',combinedID), {
                 id: combinedID,
                 users: [currentUser?.uid, otherUserUid],
-                messages: []
+                messages: [],
+                chatting: true
               })
             }
             else{
@@ -59,7 +55,9 @@ export async function CreateChat(otherUserUid: string) {
             await updateDoc(doc(db, 'users', otherUserUid), {
               chatting: true
             })
-            // end
+            
+            
+          
 
           }catch(error){
             console.log(error);
