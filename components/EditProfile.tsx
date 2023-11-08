@@ -32,7 +32,17 @@ export default function EditProfile(props: EditProfileProps) {
   const [major, setMajor] = useState(null);
   const [majors, setItems] = useState([
     { label: 'Computer Science', value: 'cs' },
-    { label: 'Electrical Engineering', value: 'ece' }
+    { label: 'Electrical Engineering', value: 'ece' },
+    { label: 'Math', value: 'math' },
+    { label: 'Physics', value: 'physics' },
+    { label: 'Biology', value: 'biology' },
+    { label: 'Economics', value: 'economics' },
+    { label: 'Romance Studies', value: 'romance studies' },
+    { label: 'Theater Studies', value: 'theater studies' },
+    { label: 'Mechanical Engineering', value: 'mechanical engineering' },
+    { label: 'Civil Engineering', value: 'civil engineering' },
+    { label: 'Biomedical Engineering', value: 'bme' },
+    { label: 'Chemical Engineering', value: 'ce' },
   ]);
 
   const [hobbies, setHobbies] = useState<string[]>([]);
@@ -143,6 +153,9 @@ export default function EditProfile(props: EditProfileProps) {
     } catch (error) {
       passedConstraints = false;
       console.log('Constraints Checking Failed');
+      Alert.alert("Invalid data entered.", "Please recheck all fields.", [
+        {  text: "Ok"  }
+      ]);
       // console.error(error);
     }
 
