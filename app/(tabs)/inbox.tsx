@@ -141,10 +141,26 @@ export default function TabOneScreen() {
         status: action,
         timestamp: serverTimestamp()
       });
-
-      if (action === 'accepted') {
-        CreateChat(senderUid)
+      // get the chatting status of both users 
+      var chatStatus_sender = (await getDocs(query(collection(FIREBASE_DB, 'users'), where('uid', '==', senderUid)))).docs[0].data().chatting;
+      console.log(chatStatus_sender);
+      var chatStatus_receiver = (await getDocs(query(collection(FIREBASE_DB, 'users'), where('uid', '==', receiverUid)))).docs[0].data().chatting;  
+      if (action === 'accepted'&& !chatStatus_receiver && !chatStatus_sender) {
+        // CreateChat(senderUid)
+        console.log(chatStatus_receiver,chatStatus_sender)
         Alert.alert('Great job, you just broke the ice!', '', [{text: 'OK', onPress: () => setRefresh(refresh + 1)}])
+      }
+      if (action ==='accepted' && chatStatus_receiver){
+        console.log(chatStatus_receiver,chatStatus_sender)
+        Alert.alert('You are chatting with someone else now', '', [{text: 'OK', onPress: () => setRefresh(refresh + 1)}])
+      }
+      if(action ==='accepted' && chatStatus_sender){
+        console.log(chatStatus_receiver,chatStatus_sender)
+        Alert.alert('The sender is chatting with someone else now', '', [{text: 'OK', onPress: () => setRefresh(refresh + 1)}])
+      }
+      if (action === 'rejected'){
+        console.log(chatStatus_receiver,chatStatus_sender)
+        Alert.alert('Rejected friend request', '', [{text: 'OK', onPress: () => setRefresh(refresh + 1)}])
       }
     } catch (error) {
       console.error(error)

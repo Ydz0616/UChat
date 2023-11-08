@@ -22,9 +22,9 @@ const Message = () => {
   const  [messages, setMessages] = useState([{id:null, text:null, sender_id:null}])
   // this is a static test example, we'll inpelement real examples
   // after the notification system is done
-  var uid = 'e0lkvGkocPUPJCvWbeZiq8SCv2o1' // Yuandong
+  var uid = 'oZQGZ4SFlhXSNNJgUhRgDw9hhEa2' // Yuandong
   if ( currentUser?.uid == uid) {
-    uid = '2Hth0GlLU0a6h0asCgJ550lZgBG2' // Jordan
+    uid = '4YBkAgcj3gYwDkJtZ21dmukexKo1' // Jordan
   }
   const combinedID = currentUser?.uid! > uid 
   ? currentUser?.uid + uid 

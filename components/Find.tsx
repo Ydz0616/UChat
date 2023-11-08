@@ -35,7 +35,7 @@ export async function CreateChat(otherUserUid: string) {
           : otherUserUid + currentUser?.uid;
          
           try{
-            console.log(combinedID, '------------start-----------');
+
             const res = await getDoc(doc(db, 'chats', combinedID));
             console.log(res);
             if(!res.exists()){
@@ -46,22 +46,21 @@ export async function CreateChat(otherUserUid: string) {
                 users: [currentUser?.uid, otherUserUid],
                 messages: []
               })
-              
-              await setDoc(doc(db,'userchats', currentUser?.uid),{
-                [combinedID+".userInfo"]:{
-                  uid:otherUserUid
-                },
-                [combinedID+".timestamp"]: serverTimestamp()
-    
-              })
-              await setDoc(doc(db,'userchats', otherUserUid),{
-                [combinedID+".userInfo"]:{
-                  uid:currentUser?.uid 
-                },
-                [combinedID+".timestamp"]: serverTimestamp()
-    
+            }
+            else{
+              await updateDoc(doc(db, 'chats',combinedID), {
+                messages:[] // clear messages   
               })
             }
+            // update chatting info
+            await updateDoc(doc(db, 'users', currentUser?.uid), {
+              chatting: true
+            }) 
+            await updateDoc(doc(db, 'users', otherUserUid), {
+              chatting: true
+            })
+            // end
+
           }catch(error){
             console.log(error);
           }

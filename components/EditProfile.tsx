@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, StyleSheet, Button, useColorScheme, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { Alert, StyleSheet, Button, useColorScheme, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard,  } from 'react-native';
 import { FontAwesomeButton } from '../components/Themed';
 import { ScrollView } from 'react-native'; 
 import { Text, View, TextInput } from './Themed';
@@ -7,6 +7,7 @@ import { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH } from '../firebaseConfig';
 import { getFirestore, collection, addDoc, query, where, updateDoc, getDocs } from 'firebase/firestore';
 import ProfilePicture from './ProfilePicture';
 import { getRandomProfilePicture } from './ProfilePicture';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 interface EditProfileProps {
   titleText: string;
@@ -26,7 +27,14 @@ export default function EditProfile(props: EditProfileProps) {
   const textColor = isDarkMode ? 'white' : 'black';
   const [username, setUsername] = useState('');
   const [classYear, setClassYear] = useState(0);;
-  const [major, setMajor] = useState('');
+
+  const [open, setOpen] = useState(false);
+  const [major,setMajor] = useState(null);
+  const [majors, setItems] = useState([
+        {label: 'Computer Science', value: 'cs'},
+        {label: 'Electrical Engineering', value: 'ee'}
+               ]);
+  
   const [hobbies, setHobbies] = useState<string[]>([]);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [profilePicture, setProfilePicture] = useState('https://firebasestorage.googleapis.com/v0/b/icebreaker-16bc6.appspot.com/o/default.png?alt=media&token=896c58fb-f80a-4664-bc82-b12727ccb541');
@@ -123,7 +131,8 @@ export default function EditProfile(props: EditProfileProps) {
             major: major,
             hobbies: hobbies.map(hobby => hobby.trim()),
             phoneNumber: phoneNumber,
-            profilepic: profilePicture
+            profilepic: profilePicture,
+            chatting: false
           });
         }
       } else {
@@ -168,12 +177,16 @@ export default function EditProfile(props: EditProfileProps) {
         keyboardType="numeric" // Use a numeric keyboard
         style={[styles.input, { color: textColor }]}
         />
-        <TextInput
-        placeholder="Major"
-        value={major}
-        onChangeText={setMajor}
-        style={[styles.input, { color: textColor }]}
-        />
+        
+        <DropDownPicker
+            open={open}
+            value={major}
+            items={majors}
+            setOpen={setOpen}
+            setValue={setMajor}
+            setItems={setItems}
+            style={[styles.input, { backgroundColor: 'white', borderColor: 'gray' }]} 
+            />    
         <TextInput
         placeholder="Hobbies"
         value={hobbies.join(',')}

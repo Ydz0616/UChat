@@ -23,12 +23,14 @@ export default function TabTwoScreen() {
       ) : (
         <View>
           <Text style={styles.messageText}>
-            You received a friend request from{' '}
-            <Text style={styles.senderText}>Crazy Giraffe</Text>. Do you want to accept it?
+            You confirmed the friend request from{' '}
+            <Text style={styles.senderText}> Happy Cat </Text>. 
+
+            Go Break the Ice!
           </Text>    
           {/* <View> <GetUser></GetUser></View> */}
           <TouchableOpacity onPress={handleAcceptRequest} style={styles.button}>
-            <Text style={styles.buttonText}>Accept</Text>
+            <Text style={styles.buttonText}>Start</Text>
           
           </TouchableOpacity>
         </View>
