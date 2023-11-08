@@ -5,87 +5,6 @@ import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
 import { collection, getDocs, query, where, serverTimestamp, updateDoc, onSnapshot } from 'firebase/firestore';
 import { CreateChat } from '../../components/Find';
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  button: {
-    marginTop: 15,
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
-  buttonOpen: {
-    backgroundColor: '#F194FF',
-  },
-  buttonClose: {
-    backgroundColor: '#2196F3',
-  },
-  resultContainer: {
-    marginBottom: 8,
-  },
-  nameText: {
-    fontSize: 18, // Set the font size to make the name larger
-    color: '#c2e0fc', // Set the color to blue
-    fontWeight: 'bold', // Optionally, you can make the text bold
-    fontStyle: 'italic',
-  },
-  // 2 below text elements are for modal
-  textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
-    color: 'black',
-  },
-  header: {
-    fontSize: 18,
-    color: 'initial',
-    fontWeight: 'bold'
-  },
-  message: {
-    fontSize: 16,
-    color: 'initial',
-  },
-  messageHighlight: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#007BFF',
-  },
-  ref: {
-    fontSize: 14,
-    color: 'gray',
-  },
-  btngroup: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-around'
-  },
-});
 
 export default function TabOneScreen() {
   const [refresh, setRefresh] = useState(0)
@@ -142,7 +61,6 @@ export default function TabOneScreen() {
   }, [refresh]);
 
   const handleUserInfoRequest = async (senderUid: string) => {
-    // TODO: display user info in dialog
     const querySnapshot = await getDocs(
       query(collection(FIREBASE_DB, 'users'), where('uid', '==', senderUid))
     );
@@ -247,3 +165,85 @@ export default function TabOneScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  button: {
+    marginTop: 15,
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonOpen: {
+    backgroundColor: '#F194FF',
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  resultContainer: {
+    marginBottom: 8,
+  },
+  nameText: {
+    fontSize: 18, // Set the font size to make the name larger
+    color: '#c2e0fc', // Set the color to blue
+    fontWeight: 'bold', // Optionally, you can make the text bold
+    fontStyle: 'italic',
+  },
+  // 2 below text elements are for modal
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+    color: 'black',
+  },
+  header: {
+    fontSize: 18,
+    color: 'initial',
+    fontWeight: 'bold'
+  },
+  message: {
+    fontSize: 16,
+    color: 'initial',
+  },
+  messageHighlight: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#007BFF',
+  },
+  ref: {
+    fontSize: 14,
+    color: 'gray',
+  },
+  btngroup: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-around'
+  },
+});
