@@ -21,7 +21,7 @@ export default function TabThreeScreen({}) {
   const [hobbies, setHobbies] = useState<string[]>([]);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
-  const [profilePicture, setProfilePicture] = useState('');
+  const [profilePicture, setProfilePicture] = useState(defaultProfilePictureURL);
   const [profileSaveCount, setProfileSaveCount] = useState(0);
   const auth  = FIREBASE_AUTH;
   const db = FIREBASE_DB;

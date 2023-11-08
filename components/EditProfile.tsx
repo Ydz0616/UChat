@@ -6,7 +6,7 @@ import { Text, View, TextInput } from './Themed';
 import { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH } from '../firebaseConfig';
 import { getFirestore, collection, addDoc, query, where, updateDoc, getDocs } from 'firebase/firestore';
 import ProfilePicture from './ProfilePicture';
-import { getRandomProfilePicture } from './ProfilePicture';
+import { getRandomProfilePicture, defaultProfilePictureURL } from './ProfilePicture';
 import DropDownPicker from 'react-native-dropdown-picker';
 
 interface EditProfileProps {
@@ -37,7 +37,7 @@ export default function EditProfile(props: EditProfileProps) {
 
   const [hobbies, setHobbies] = useState<string[]>([]);
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [profilePicture, setProfilePicture] = useState('https://firebasestorage.googleapis.com/v0/b/icebreaker-16bc6.appspot.com/o/default.png?alt=media&token=896c58fb-f80a-4664-bc82-b12727ccb541');
+  const [profilePicture, setProfilePicture] = useState(defaultProfilePictureURL);
 
 
   const auth = FIREBASE_AUTH;
