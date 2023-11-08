@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, FlatList, Button, Pressable, Modal, Alert } from 'react-native';
 import { Text, View } from '../../components/Themed';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
-import { collection, getDocs, query, where, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, serverTimestamp, updateDoc, onSnapshot } from 'firebase/firestore';
 import { CreateChat } from '../../components/Find';
 
 const styles = StyleSheet.create({
@@ -97,16 +97,41 @@ export default function TabOneScreen() {
   const fetchData = async () => {
     setUserNotifications([])
     try {
-      // Fetch their notifications
-      const requestQuerySnapshot = await getDocs(
-        query(collection(FIREBASE_DB, 'notifications'), where('receiver', '==', user!.uid))
-      );
-      requestQuerySnapshot.forEach((doc) => {
-        const request = doc.data();
-        if (request?.status === 'pending') {
-          setUserNotifications([...userNotifications, request]);
-        }
+      
+      // // Fetch their notifications
+      // const requestQuerySnapshot = await getDocs(
+      //   query(collection(FIREBASE_DB, 'notifications'), where('receiver', '==', user!.uid))
+      // );
+
+      // requestQuerySnapshot.forEach((doc) => {
+      //   const request = doc.data();
+      //   if (request?.status === 'pending') {
+      //     setUserNotifications([...userNotifications, request]);
+      //   }
+      // });
+
+      const notificationsRef = collection(FIREBASE_DB, 'notifications');
+      const queryRef = query(notificationsRef, where('receiver', '==', user!.uid));
+    
+      // Initialize the userNotifications array
+      const initialUserNotifications: any[] = [];
+    
+      const eventlistener = onSnapshot(queryRef, (querySnapshot) => {
+        const updatedNotifications: any[] = initialUserNotifications;
+    
+        querySnapshot.forEach((doc) => {
+          const request = doc.data() as any; // Type assertion
+          if (request?.status === 'pending') {
+            updatedNotifications.push(request);
+          }
+        });
+    
+        setUserNotifications(updatedNotifications);
       });
+      return () => {
+        // Unsubscribe from the snapshot listener when component unmounts
+        eventlistener();
+      };
     } catch (error) {
       console.error(error);
     }
@@ -134,19 +159,19 @@ export default function TabOneScreen() {
         query(collection(FIREBASE_DB, 'notifications'), where('sender', '==', senderUid), where('receiver', '==', receiverUid))
       );
       const existingDocRef = querySnapshot.docs[0].ref;
-      await updateDoc(existingDocRef, {
-        type: 'friend-request',
-        sender: senderUid,
-        receiver: receiverUid,
-        status: action,
-        timestamp: serverTimestamp()
-      });
       // get the chatting status of both users 
       var chatStatus_sender = (await getDocs(query(collection(FIREBASE_DB, 'users'), where('uid', '==', senderUid)))).docs[0].data().chatting;
       console.log(chatStatus_sender);
       var chatStatus_receiver = (await getDocs(query(collection(FIREBASE_DB, 'users'), where('uid', '==', receiverUid)))).docs[0].data().chatting;  
       if (action === 'accepted'&& !chatStatus_receiver && !chatStatus_sender) {
-        // CreateChat(senderUid)
+        await CreateChat(senderUid)
+        await updateDoc(existingDocRef, {
+          type: 'friend-request',
+          sender: senderUid,
+          receiver: receiverUid,
+          status: action,
+          timestamp: serverTimestamp()
+        });
         console.log(chatStatus_receiver,chatStatus_sender)
         Alert.alert('Great job, you just broke the ice!', '', [{text: 'OK', onPress: () => setRefresh(refresh + 1)}])
       }
@@ -159,6 +184,13 @@ export default function TabOneScreen() {
         Alert.alert('The sender is chatting with someone else now', '', [{text: 'OK', onPress: () => setRefresh(refresh + 1)}])
       }
       if (action === 'rejected'){
+        await updateDoc(existingDocRef, {
+          type: 'friend-request',
+          sender: senderUid,
+          receiver: receiverUid,
+          status: action,
+          timestamp: serverTimestamp()
+        });
         console.log(chatStatus_receiver,chatStatus_sender)
         Alert.alert('Rejected friend request', '', [{text: 'OK', onPress: () => setRefresh(refresh + 1)}])
       }
