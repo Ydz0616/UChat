@@ -19,6 +19,7 @@ const Message = (_uid:any) => {
   
   const db  = FIREBASE_DB;
   const currentUser = FIREBASE_AUTH.currentUser;
+  // write a export function that takes a uid and return the chat id
   const combinedID = currentUser?.uid! > _uid 
   ? currentUser?.uid + _uid 
   : _uid + currentUser?.uid;
@@ -60,12 +61,8 @@ const Message = (_uid:any) => {
 
 
 
-
-
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
-
       <FlatList
         data={messages}
         // keyExtractor={(item) => item.id}
