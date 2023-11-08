@@ -26,6 +26,11 @@ export default function TabThreeScreen({}) {
   const auth  = FIREBASE_AUTH;
   const db = FIREBASE_DB;
 
+  const majorsMap = new Map([
+    ['cs', 'Computer Science'],
+    ['ece', 'Electrical and Computer Engineering'],
+  ]);
+
   useEffect(() => {
     const user = auth.currentUser;
     const updateProfileData = async () => {
@@ -35,9 +40,9 @@ export default function TabThreeScreen({}) {
         );
         if (querySnapshot.docs.length > 0) {
           const userData = querySnapshot.docs[0].data();
-          setUsername(userData.username)
+          setUsername(userData.username);
           setClassYear(userData.classYear);
-          setMajor(userData.major);
+          setMajor(userData.major.toLowerCase());
           setHobbies(userData.hobbies); // Convert the array back to a string
           setPhoneNumber(userData.phoneNumber);
           setEmail(user!.email ?? '');
@@ -46,7 +51,7 @@ export default function TabThreeScreen({}) {
 
         }
       } catch (error) {
-        console.error(error);
+          console.log(error)
       }
     };
   
@@ -61,9 +66,9 @@ export default function TabThreeScreen({}) {
     setIsEditing(true);
   };
 
-  const handleSaveProfile = () => {
-    setIsEditing(false);
-    setProfileSaveCount(profileSaveCount + 1);
+  const handleSaveProfile = (passed: boolean) => {
+    setIsEditing(!passed);
+    setProfileSaveCount(profileSaveCount + (passed ? 1 : 0));
   };
 
   const handleCancel = () => {
@@ -73,7 +78,7 @@ export default function TabThreeScreen({}) {
   const handleChangeEmail = () => {
     Alert.alert('Change Email', 'Unfortunately, you cannot change your email at this time. You may sign out and create a new account with a different email.')
   }
-
+  
   if (isEditing) {
     return (
       <View style={styles.container}>
@@ -94,7 +99,7 @@ export default function TabThreeScreen({}) {
         <ProfilePicture profilePicture={profilePicture || defaultProfilePictureURL} />
         <Text style={styles.welcomeTitle}>Hello, {username}!</Text>
         <Text style={[styles.details, { color: textColor }]}>Class Year: {classYear}</Text>
-        <Text style={[styles.details, { color: textColor }]}>Major: {major}</Text>
+        <Text style={[styles.details, { color: textColor }]}>Major: {majorsMap.get(major)}</Text>
         <Text style={[styles.details, { color: textColor }]}>Hobbies: {hobbies.join(", ")}</Text>
         <Text style={[styles.details, { color: textColor }]}>Phone Number: {phoneNumber}</Text>
         <Text style={[styles.details, { color: textColor }]}>Email: {email}</Text>

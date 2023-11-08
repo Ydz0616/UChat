@@ -15,7 +15,7 @@ interface EditProfileProps {
   showCancel: boolean;
   handleCancel?: () => void;
   saveProfileButtonText: string;
-  handleSaveProfile: () => void;
+  handleSaveProfile: (passed: boolean) => void;
 }
 
 export default function EditProfile(props: EditProfileProps) {
@@ -32,7 +32,7 @@ export default function EditProfile(props: EditProfileProps) {
   const [major, setMajor] = useState(null);
   const [majors, setItems] = useState([
     { label: 'Computer Science', value: 'cs' },
-    { label: 'Electrical Engineering', value: 'ee' }
+    { label: 'Electrical Engineering', value: 'ece' }
   ]);
 
   const [hobbies, setHobbies] = useState<string[]>([]);
@@ -76,7 +76,7 @@ export default function EditProfile(props: EditProfileProps) {
           setProfilePicture(userData.profilepic);
         }
       } catch (error) {
-        console.error(error);
+        console.log(error);
       }
     };
 
@@ -92,6 +92,7 @@ export default function EditProfile(props: EditProfileProps) {
   }, []);
 
   const saveProfile = async () => {
+    let passedConstraints = true;
     try {
       // Get the current user from Firebase Authentication
       const user = auth.currentUser;
@@ -137,13 +138,15 @@ export default function EditProfile(props: EditProfileProps) {
           });
         }
       } else {
-        console.error("User not signed in.");
+        console.log("User not signed in.");
       }
     } catch (error) {
-      console.error(error);
+      passedConstraints = false;
+      console.log('Constraints Checking Failed');
+      // console.error(error);
     }
 
-    handleSaveProfile();
+    handleSaveProfile(passedConstraints);
   };
 
   const handleHobbyAdd = () => { setHobbies([...hobbies, '']) }
@@ -206,6 +209,7 @@ export default function EditProfile(props: EditProfileProps) {
         <View style={styles.hobbiesContainer}>
           {hobbies.map((item, idx) =>
             <TextInput
+               key={idx.toString()}
               style={styles.hobbyItem}
               placeholder='new'
               value={item}
