@@ -10,58 +10,6 @@ interface Person {
   hobbies: string[];
   profilePicture: string;
 }
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  loaderContainer: {
-    flex: 1,
-    zIndex: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  searchInput: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 16,
-    paddingLeft: 8,
-    color: 'black',
-    backgroundColor: '#c9fdcd',
-    borderRadius: 8,
-  },
-  resultContainer: {
-    marginBottom: 8,
-  },
-  nameText: {
-    fontSize: 20, // Set the font size to make the name larger
-    fontWeight: 'bold', // Optionally, you can make the text bold
-  },
-  redirect: {
-    fontSize: 14,
-    color: '#c2e0fc',
-    textDecorationLine: 'underline',
-  },
-  status: {
-    fontSize: 14,
-    fontStyle: 'italic',
-    color: 'gray',
-  },
-  userInfoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  profilePicture: {
-    width: 40, // Adjust the width and height as needed
-    height: 40,
-    borderRadius: 20, // Make it circular
-    marginRight: 10, // Add some spacing to the right of the picture
-  },
-  userInfoText: {
-    flex: 1,
-  },
-});
 
 export default function TabOneScreen() {
   const [isLoading, setIsLoading] = useState(true)
@@ -235,3 +183,56 @@ export default function TabOneScreen() {
   );
   
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  loaderContainer: {
+    flex: 1,
+    zIndex: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  searchInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 16,
+    paddingLeft: 8,
+    color: 'black',
+    backgroundColor: '#c9fdcd',
+    borderRadius: 8,
+  },
+  resultContainer: {
+    marginBottom: 8,
+  },
+  nameText: {
+    fontSize: 20, // Set the font size to make the name larger
+    fontWeight: 'bold', // Optionally, you can make the text bold
+  },
+  redirect: {
+    fontSize: 14,
+    color: 'lightblue',
+    textDecorationLine: 'underline',
+  },
+  status: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    color: 'gray',
+  },
+  userInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  profilePicture: {
+    width: 40, // Adjust the width and height as needed
+    height: 40,
+    borderRadius: 20, // Make it circular
+    marginRight: 10, // Add some spacing to the right of the picture
+  },
+  userInfoText: {
+    flex: 1,
+  },
+});
