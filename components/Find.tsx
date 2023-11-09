@@ -63,7 +63,6 @@ export async function CreateChat(otherUserUid: string) {
               await updateDoc(existingDocRef2, {
                 chatting: true,
               });
-            
             }
             
             

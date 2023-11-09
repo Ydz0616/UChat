@@ -1,10 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
 import { Platform, StyleSheet ,Button,useColorScheme, Alert} from 'react-native';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../firebaseConfig';
-import { collection, query, where,doc, onSnapshot,getDocs, updateDoc} from 'firebase/firestore';
+import { collection, query, where,doc, onSnapshot,getDocs, updateDoc, setDoc} from 'firebase/firestore';
 import { Text, View } from '../components/Themed';
 import { useEffect, useState } from 'react';
 import ProfilePicture from '../components/ProfilePicture';
+import Message from '../components/Message';
 
 export default function ModalScreen() {
 
@@ -20,6 +21,7 @@ export default function ModalScreen() {
   const [major, setMajor] = useState('' as any)
   const [classYear, setClassYear] = useState('' as any)
   const [hobbies, setHobbies] = useState([] as any)
+  const [uid, setUid] = useState('' as any)
   const majorsMap = new Map([
     ['cs', 'Computer Science'],
     ['ece', 'Electrical Engineering'],
@@ -35,13 +37,13 @@ export default function ModalScreen() {
   ]);
 
   const fetchData = async () => {
-    var uid = null
     try{
       const notificationsRef = collection(FIREBASE_DB, 'chats');
       // the queryRef should be the doc that the current user is in the users array and the chatting is ture
       const queryRef = query(notificationsRef, where('users', 'array-contains', currentUser?.uid),where('chatting','==',true));
 
       const eventlistener = onSnapshot(queryRef, (querySnapshot) => {
+        var uid = null
         if(!querySnapshot.empty){setShowChat(true)}
         querySnapshot.forEach((doc) => {
           var chatData = doc.data();
@@ -53,7 +55,10 @@ export default function ModalScreen() {
             // get the user data from the second user from users collection where the uid is the second user
             uid = chatData.users[0]
           }
-          const combinedID = currentUser?.uid! > uid! 
+          if(uid!){
+            setUid(uid)
+          }
+          const combinedID = currentUser?.uid! > uid!
             ? currentUser?.uid + uid!
             : uid! + currentUser?.uid;
           setCombinedID(combinedID)
@@ -82,15 +87,57 @@ export default function ModalScreen() {
     try{
       // update the doc in the chats collection where the combined ID is its identifier and set the chatting to false
       
-      updateDoc(doc(db,'chats',combinedID), {
+      await updateDoc(doc(db,'chats',combinedID), {
         chatting: false
-      }).then(() => {
-       Alert.alert('Chat aborted')
-      });
+      })
+      const querySnapshot = await getDocs(
+        query(collection(db, 'users'), where('uid', '==', currentUser?.uid))
+      );
+      const querySnapshot2 = await getDocs(query(collection(db, 'users'), where('uid', '==', uid)))
+      if (querySnapshot.docs.length > 0 && querySnapshot2.docs.length > 0) {
+        const existingDocRef = querySnapshot.docs[0].ref;
+        await updateDoc(existingDocRef, {
+          chatting: false,
+        });
+        const existingDocRef2 = querySnapshot2.docs[0].ref;
+        await updateDoc(existingDocRef2, {
+          chatting: false,
+        });
+      }
       
     }catch(error){console.log(error)}
   }
-
+  const reportUser = async () => {
+    try{
+      // update the doc in the chats collection where the combined ID is its identifier and set the chatting to false
+      
+      await updateDoc(doc(db,'chats',combinedID), {
+        chatting: false
+      })
+      const querySnapshot = await getDocs(
+        query(collection(db, 'users'), where('uid', '==', currentUser?.uid))
+      );
+      const querySnapshot2 = await getDocs(query(collection(db, 'users'), where('uid', '==', uid)))
+      if (querySnapshot.docs.length > 0 && querySnapshot2.docs.length > 0) {
+        const existingDocRef = querySnapshot.docs[0].ref;
+        await updateDoc(existingDocRef, {
+          chatting: false,
+        });
+        const existingDocRef2 = querySnapshot2.docs[0].ref;
+        await updateDoc(existingDocRef2, {
+          chatting: false,
+        });
+        // upload a doc to report collection with the uid of reporter and the uid of the reported user and the type
+        await setDoc(doc(db,'report',combinedID),{
+          reporter: currentUser?.uid,
+          reported: uid,
+          id: combinedID,
+          type: 'harassment'
+        })
+      }
+      
+    }catch(error){console.log(error)}
+  }
   const getUserData = async (uid:any) =>{
     const querySnapshot = await getDocs(
       query(collection(db, 'users'), where('uid', '==', uid))
@@ -113,8 +160,10 @@ export default function ModalScreen() {
         <Text style={[styles.details, { color: textColor }]}>Class Year: {classYear}</Text>
         <Text style={[styles.details, { color: textColor }]}>Major: {majorsMap.get(major)}</Text>
         <Text style={[styles.details, { color: textColor }]}>Hobbies: {hobbies.join(", ")}</Text>
-        <Button title='Abort Chat' onPress={abortChat}></Button>
-        <Button title='Exchange Number' onPress={abortChat}></Button>
+        
+        <Button title='Abort Chat' color = 'red' onPress={abortChat}></Button>
+        <Button title='Report User' color = 'red' onPress={reportUser}></Button>
+        
       </View>
     ) : (<View style = {styles.container}>
       <Text style={styles.details}>
