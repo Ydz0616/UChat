@@ -71,6 +71,7 @@ export default function TabOneScreen() {
   const [userFriends, setUserFriends] = useState(new Set())
   const [pendingRequests, setPendingRequest] = useState(new Set())
   const [profilePicture, setProfilePicture] = useState('');
+  const [searchResults, setSearchResults] = useState<Person[]>([])
   const user = FIREBASE_AUTH.currentUser;
   const fetchData = async () => {
     setIsLoading(true)
@@ -107,10 +108,7 @@ export default function TabOneScreen() {
 
 
       // Fetch all users where hobbies match search term
-      const searchTermSplit = searchTerm.split(',').map(term => term.trim().toLowerCase());
-      const q = searchTerm == '' ?
-            query(users, where('uid', '!=', user!.uid)) : 
-            query(users, where('hobbies', 'array-contains-any', searchTermSplit), where('uid', '!=', user!.uid));
+      const q = query(users, where('uid', '!=', user!.uid))
       const usersQuerySnapshot = await getDocs(q);
 
       const hobbiesData: Person[] = [];
@@ -126,6 +124,10 @@ export default function TabOneScreen() {
       
       setUserHobbies(hobbiesData);
 
+      if (refresh == 0) {
+        search(searchTerm, hobbiesData)
+      }
+
       setIsLoading(false)
     } catch (error) {
       console.error(error);
@@ -136,6 +138,28 @@ export default function TabOneScreen() {
   useEffect(() => {
     fetchData();
   }, [refresh]);
+
+  const search = (newSearchTerm: string, hobbies?: Person[]) => {
+    if (!hobbies) {
+      hobbies = userHobbies
+    }
+
+    setSearchTerm(newSearchTerm)
+
+    if (newSearchTerm == '') {
+      setSearchResults(hobbies)
+      return
+    }
+
+    const searchTermSplit = newSearchTerm.split(',').map(term => term.trim().toLowerCase());
+    const filteredResults = hobbies.filter((user) => {
+      return searchTermSplit.some((term) =>
+        user.hobbies.some(hobby => hobby.includes(term)) || 
+        user.username.toLowerCase().includes(term)
+      );
+    });
+    setSearchResults(filteredResults)
+  }
 
   const handleUserRequestAction = async (receiverUsername: string, receiverUid: string) => {
     Alert.alert('Friend Request', `Are you sure that you want to send a friend request to ${receiverUsername}?`, [
@@ -172,8 +196,7 @@ export default function TabOneScreen() {
       <TextInput
         style={styles.searchInput}
         placeholder="Search by hobby"
-        onSubmitEditing={fetchData}
-        onChangeText={setSearchTerm}
+        onChangeText={search}
         value={searchTerm}
         returnKeyType="search"
       />
@@ -182,9 +205,9 @@ export default function TabOneScreen() {
           <ActivityIndicator animating={true} size="large" color="black" />
         </View>
       ) : null}
-      {userHobbies.length > 0 && !isLoading ? (
+      {searchResults.length > 0 && !isLoading ? (
         <FlatList
-          data={userHobbies}
+          data={searchResults}
           renderItem={({ item }) => (
             <View style={styles.resultContainer}>
               <View style={styles.userInfoContainer}>
