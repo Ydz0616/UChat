@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 
 import { FIREBASE_DB, FIREBASE_AUTH, FIREBASE_APP } from '../firebaseConfig';
-import { updateDoc, doc,addDoc, setDoc ,getDoc,  serverTimestamp, onSnapshot, collection } from '@firebase/firestore';
+import { updateDoc, doc,addDoc, setDoc ,getDoc,getDocs,where,query, serverTimestamp, onSnapshot, collection } from '@firebase/firestore';
 
 
   
@@ -45,16 +45,26 @@ export async function CreateChat(otherUserUid: string) {
             }
             else{
               await updateDoc(doc(db, 'chats',combinedID), {
+                chatting:true,
                 messages:[] // clear messages   
               })
             }
             // update chatting info
-            await updateDoc(doc(db, 'users', currentUser?.uid), {
-              chatting: true
-            }) 
-            await updateDoc(doc(db, 'users', otherUserUid), {
-              chatting: true
-            })
+            const querySnapshot = await getDocs(
+              query(collection(db, 'users'), where('uid', '==', currentUser.uid))
+            );
+            const querySnapshot2 = await getDocs(query(collection(db, 'users'), where('uid', '==', otherUserUid)))
+            if (querySnapshot.docs.length > 0 && querySnapshot2.docs.length > 0) {
+              const existingDocRef = querySnapshot.docs[0].ref;
+              await updateDoc(existingDocRef, {
+                chatting: true,
+              });
+              const existingDocRef2 = querySnapshot2.docs[0].ref;
+              await updateDoc(existingDocRef2, {
+                chatting: true,
+              });
+            
+            }
             
             
           

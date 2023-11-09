@@ -1,16 +1,10 @@
 import { FlatList, KeyboardAvoidingView, SafeAreaView, StyleSheet,Image } from 'react-native';
-import EditScreenInfo from '../../components/EditScreenInfo';
 import { Text, View , TextInput} from '../../components/Themed';
-import Message from '../../components/Message';
 import React, { useState,useEffect, useRef } from 'react';
 import { TouchableOpacity } from 'react-native';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
-import { collection, getDoc,query, where, serverTimestamp, updateDoc, onSnapshot,doc, getDocs, Timestamp, arrayUnion} from 'firebase/firestore';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { collection, query, where,  updateDoc, onSnapshot,doc, getDocs, Timestamp, arrayUnion} from 'firebase/firestore';
 
-import ProfilePicture, { defaultProfilePictureURL } from '../../components/ProfilePicture';
 export default function TabTwoScreen() {
 
 
@@ -21,8 +15,6 @@ export default function TabTwoScreen() {
   const db  = FIREBASE_DB;
   const currentUser = FIREBASE_AUTH.currentUser;
   const [combinedID, setCombinedID] = useState('' as any)
-  const [avatar, setAvatar] = useState('' as any) 
-  const [name, setName] = useState('' as any) 
   const fetchData = async () => {
   var uid = null
     try {
@@ -50,10 +42,11 @@ export default function TabTwoScreen() {
             getUserData(uid!)
             setMessages(chatData.messages)
             setShowChat(true)
-
         })
         if(querySnapshot.empty){
           console.log('empty') 
+          setShowChat(false)
+
           return
         }
       });
@@ -78,8 +71,7 @@ export default function TabTwoScreen() {
     );
 
     console.log(querySnapshot.docs[0].data())
-    setName(querySnapshot.docs[0].data().username)
-    setAvatar(querySnapshot.docs[0].data().profilepic)
+
     
   }
 
@@ -110,36 +102,20 @@ export default function TabTwoScreen() {
         console.log(error);
       }
     }
-    const MyComponent: React.FC = () => {
-      return (
-        <View>
-          <Image
-            source={{ uri: 'https://example.com/path-to-your-image.jpg' }}
-            style={{ width: 100, height: 100 }} // You can adjust the width and height
-          />
-        </View>
-      );
-    };
+
     }
   
   return (
     <View style={styles.container}>
       {showChat ? (
         <SafeAreaView style={{ flex: 1 }}>
-        <View style={styles.userHeader}>
+        {/* <View style={styles.userHeader}>
         <View style={styles.avatarContainer}>
           <Image source={{ uri: avatar }} style={styles.avatar} />
           <Text style={styles.userName}>{name}</Text>
         </View>
-          {/* <ProfilePicture profilePicture={avatar}/> */}
-          {/* User name */}
-          
-          {/* Icon on the right */}
-          <TouchableOpacity style={styles.iconContainer}>
-          <Icon name="ellipsis-h" size={24} color="black" /> {/* Three dots icon */}
-        </TouchableOpacity>
-        </View>
-        <FlatList
+        </View> */}
+        <FlatList style={{ marginTop: 20}} 
           data={messages}
           // keyExtractor={(item) => item.id}
           renderItem={({item }) => (
@@ -191,9 +167,8 @@ export default function TabTwoScreen() {
             Oops~ Looks Like You Don't Have a Chat Yet.
           </Text>    
           {/* <View> <GetUser></GetUser></View> */}
-          <TouchableOpacity onPress={handleAcceptRequest} style={styles.button}>
-            <Text style={styles.buttonText}>Find A Friend</Text>
-          
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.buttonText}>Find A Friend!!</Text>
           </TouchableOpacity>
         </View>
       )}

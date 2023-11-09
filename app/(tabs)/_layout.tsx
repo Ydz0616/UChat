@@ -13,6 +13,10 @@ function TabBarIcon(props: {
 }) {
   return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
 }
+export const unstable_settings = {
+  // Ensure that reloading on `/modal` keeps a back button present.
+  initialRouteName: '(tabs)',
+};
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -39,14 +43,27 @@ export default function TabLayout() {
           headerTitleAlign:'left',
           // headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="comment" color={color} />,
+          headerRight: () => (
+            <Link href="/modal" asChild>
+              <Pressable>
+                {({ pressed }) => (
+                  <FontAwesome
+                    name="info-circle"
+                    size={25}
+                    color={Colors[colorScheme ?? 'light'].text}
+                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
+                  />
+                )}
+              </Pressable>
+            </Link>
+          ),
         }}
       />
 
       <Tabs.Screen
         name="profile"
         options={{
-          // headerShown: false,
-
+          headerShown: false,
           title: 'Uchat|Profile',
           tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
         }}
