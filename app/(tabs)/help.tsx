@@ -48,6 +48,7 @@ export default function TabOneScreen() {
           reportee: reportUser,
           category: reportCategory,
           description: reportDescription,
+          status: 'in review',
           timestamp: serverTimestamp(),
         });
         Alert.alert('Submitted', 'Thank you for sharing this with us. We will be sure to look carefully into this situation and take the appropriate action.')
@@ -76,6 +77,7 @@ export default function TabOneScreen() {
           user: user?.uid,
           category: contactCategory,
           description: contactDescription,
+          status: 'in review',
           timestamp: serverTimestamp(),
         });
         Alert.alert('We appreciate your feedback', 'Thank you for sharing this with us. We will be sure to properly handle this situation.')
