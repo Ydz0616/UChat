@@ -123,7 +123,6 @@ export default function TabOneScreen() {
           profilePicture: queryUser.profilepic || 'https://firebasestorage.googleapis.com/v0/b/icebreaker-16bc6.appspot.com/o/default.png?alt=media&token=896c58fb-f80a-4664-bc82-b12727ccb541',
         });
       });
-
       
       setUserHobbies(hobbiesData);
 
@@ -208,7 +207,7 @@ export default function TabOneScreen() {
           )}
           keyExtractor={(item) => item.uid}
         />
-      ) : null}
+      ) : <Text>No results</Text>}
     </View>
   );
   
