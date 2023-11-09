@@ -167,9 +167,7 @@ export default function TabTwoScreen() {
             Oops~ Looks Like You Don't Have a Chat Yet.
           </Text>    
           {/* <View> <GetUser></GetUser></View> */}
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Find A Friend!!</Text>
-          </TouchableOpacity>
+
         </View>
       )}
     </View>
