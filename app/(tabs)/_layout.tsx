@@ -30,7 +30,7 @@ export default function TabLayout() {
         name="search"
         options={{
           // headerShown: false,
-          headerTitleAlign:'left',
+          headerTitleAlign: 'left',
           title: 'UChat|Search',
           tabBarIcon: ({ color }) => <TabBarIcon name="search" color={color} />,
         }}
@@ -40,7 +40,7 @@ export default function TabLayout() {
         name="chat"
         options={{
           title: 'UChat|Chat',
-          headerTitleAlign:'left',
+          headerTitleAlign: 'left',
           // headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="comment" color={color} />,
           headerRight: () => (
@@ -75,6 +75,15 @@ export default function TabLayout() {
           // headerShown: false, 
           title: 'Inbox',
           tabBarIcon: ({ color }) => <TabBarIcon name="inbox" color={color} />,
+        }}
+      />
+
+      <Tabs.Screen
+        name="help"
+        options={{
+          // headerShown: false, 
+          title: 'Help',
+          tabBarIcon: ({ color }) => <TabBarIcon name="frown-o" color={color} />,
         }}
       />
 
