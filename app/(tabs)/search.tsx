@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, FlatList, Pressable, Alert, ActivityIndicator, Image } from 'react-native';
 import { Text, View, TextInput } from '../../components/Themed';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
-import { collection, getDocs, setDoc,query, where, serverTimestamp, addDoc,doc, or } from 'firebase/firestore';
+import { collection, getDocs, setDoc,query, where, orderBy, serverTimestamp,doc, or } from 'firebase/firestore';
 
 interface Person {
   uid: string;
@@ -61,18 +61,33 @@ export default function TabOneScreen() {
 
 
       // Fetch all users where hobbies match search term
-      const q = query(users, where('uid', '!=', user!.uid))
+      const q = query(users, orderBy("username"));
       const usersQuerySnapshot = await getDocs(q);
 
       const hobbiesData: Person[] = [];
       usersQuerySnapshot.forEach((doc) => {
         const queryUser = doc.data();
+
+        if (queryUser.uid == user!.uid) {
+          return;
+        }
+
         hobbiesData.push({
           uid: queryUser.uid,
           username: queryUser.username,
           hobbies: queryUser.hobbies === null ? ['No Hobbies'] : queryUser.hobbies,
           profilePicture: queryUser.profilepic || 'https://firebasestorage.googleapis.com/v0/b/icebreaker-16bc6.appspot.com/o/default.png?alt=media&token=896c58fb-f80a-4664-bc82-b12727ccb541',
         });
+      });
+
+      hobbiesData.sort((a, b) => {
+        if (a.username.toLowerCase() < b.username.toLowerCase()) {
+          return -1;
+        }
+        if (a.username.toLowerCase() > b.username.toLowerCase()) {
+          return 1;
+        }
+        return 0;
       });
       
       setUserHobbies(hobbiesData);
