@@ -4,8 +4,8 @@ import { FIREBASE_DB, FIREBASE_AUTH } from '../firebaseConfig';
 import { collection, query, where,doc, onSnapshot,getDocs, updateDoc, setDoc} from 'firebase/firestore';
 import { Text, View } from '../components/Themed';
 import { useEffect, useState } from 'react';
-import ProfilePicture from '../components/ProfilePicture';
-import Message from '../components/Message';
+import ProfilePicture ,{defaultProfilePictureURL}from '../components/ProfilePicture';
+
 
 export default function ModalScreen() {
 
@@ -37,6 +37,7 @@ export default function ModalScreen() {
   ]);
 
   const fetchData = async () => {
+    
     try{
       const notificationsRef = collection(FIREBASE_DB, 'chats');
       // the queryRef should be the doc that the current user is in the users array and the chatting is ture
@@ -44,7 +45,9 @@ export default function ModalScreen() {
 
       const eventlistener = onSnapshot(queryRef, (querySnapshot) => {
         var uid = null
+
         if(!querySnapshot.empty){setShowChat(true)}
+
         querySnapshot.forEach((doc) => {
           var chatData = doc.data();
           if(chatData.users[0] == currentUser?.uid){
@@ -103,6 +106,7 @@ export default function ModalScreen() {
         await updateDoc(existingDocRef2, {
           chatting: false,
         });
+        Alert.alert('Chat Aborted')
       }
       
     }catch(error){console.log(error)}
@@ -134,6 +138,7 @@ export default function ModalScreen() {
           id: combinedID,
           type: 'harassment'
         })
+        Alert.alert('User Reported') 
       }
       
     }catch(error){console.log(error)}
@@ -155,7 +160,7 @@ export default function ModalScreen() {
   <View style={styles.container}>
     {showChat ? (
       <View>
-        <ProfilePicture profilePicture={avatar} />
+        <ProfilePicture profilePicture={avatar ||  defaultProfilePictureURL} />
         <Text style={styles.title}>{name}</Text>
         <Text style={[styles.details, { color: textColor }]}>Class Year: {classYear}</Text>
         <Text style={[styles.details, { color: textColor }]}>Major: {majorsMap.get(major)}</Text>
@@ -166,15 +171,21 @@ export default function ModalScreen() {
         
       </View>
     ) : (<View style = {styles.container}>
-      <Text style={styles.details}>
-        Oops~ Looks Like You Don't Have a Chat Yet.
+      <Text style={styles.title}>
+        Tips 
       </Text>    
+       
       {/* <View> <GetUser></GetUser></View> */}
       <Text style = {styles.details}>
-        Check your Inbox!
+        Go to search page to look for a user to chat with
       </Text>
       <Text style = {styles.details}>
-        Go Search a Friend!
+        Go to inbox page to receive friend requests
+      </Text>
+
+
+      <Text style = {styles.details}>
+        Go to profile page to edit your profile
       </Text>
     </View>)}
   </View>
@@ -191,6 +202,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
+    marginBottom:20,
+    
   },
   separator: {
     marginVertical: 30,
@@ -198,8 +211,9 @@ const styles = StyleSheet.create({
     width: '80%',
   },
   details: {
-    fontSize: 16,
-    marginVertical: 5,
+    fontSize: 15,
+    marginVertical: 10,
+    
   },
 });
 
