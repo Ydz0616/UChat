@@ -27,8 +27,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 16,
     paddingLeft: 8,
-    color: 'black',
-    backgroundColor: '#c9fdcd',
     borderRadius: 8,
   },
   resultContainer: {
@@ -208,7 +206,7 @@ export default function TabOneScreen() {
       {searchResults.length > 0 && !isLoading ? (
         <FlatList
           data={searchResults}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             <View style={styles.resultContainer}>
               <View style={styles.userInfoContainer}>
                 <Image source={{ uri: item.profilePicture }} style={styles.profilePicture} />
@@ -226,6 +224,16 @@ export default function TabOneScreen() {
                   }
                 </View>
               </View>
+              { index < searchResults.length - 1 && (
+                <View
+                  lightColor="black"
+                  darkColor="white"
+                  style={{
+                    height: StyleSheet.hairlineWidth,
+                    marginTop: 8
+                  }}
+                />
+              )}
             </View>
           )}
           keyExtractor={(item) => item.uid}
