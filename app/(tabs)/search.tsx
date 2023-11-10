@@ -3,6 +3,7 @@ import { StyleSheet, FlatList, Pressable, Alert, ActivityIndicator, Image } from
 import { Text, View, TextInput } from '../../components/Themed';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
 import { collection, getDocs, setDoc,query, where, orderBy, serverTimestamp,doc, or } from 'firebase/firestore';
+import { FontAwesome } from '@expo/vector-icons';
 
 interface Person {
   uid: string;
@@ -166,13 +167,16 @@ export default function TabOneScreen() {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search by hobby"
-        onChangeText={search}
-        value={searchTerm}
-        returnKeyType="search"
-      />
+      <View style={styles.searchBar}>
+        <FontAwesome name="search" size={24} color="black" style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search by hobby"
+          onChangeText={search}
+          value={searchTerm}
+          returnKeyType="search"
+        />
+      </View>
       {isLoading ? (
         <View style={styles.loaderContainer}>
           <ActivityIndicator animating={true} size="large" color="black" />
@@ -232,7 +236,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  searchBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  searchIcon: {
+    padding: 10,
+  },
   searchInput: {
+    flex: 1,
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
