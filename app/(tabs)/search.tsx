@@ -170,7 +170,7 @@ export default function TabOneScreen() {
         <FontAwesome name="search" size={24} color="black" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search by hobby"
+          placeholder="Search by hobby or username"
           onChangeText={search}
           value={searchTerm}
           returnKeyType="search"
