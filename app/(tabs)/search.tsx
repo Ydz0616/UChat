@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, FlatList, Pressable, Alert, ActivityIndicator, Image } from 'react-native';
-import { Text, View, TextInput } from '../../components/Themed';
+import { Text, View, TextInput, FontAwesome } from '../../components/Themed';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
 import { collection, getDocs, setDoc,query, where, orderBy, serverTimestamp,doc, or } from 'firebase/firestore';
-import { FontAwesome } from '@expo/vector-icons';
 
 interface Person {
   uid: string;

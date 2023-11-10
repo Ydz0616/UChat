@@ -4,7 +4,7 @@
  */
 
 import { Text as DefaultText, useColorScheme, View as DefaultView, TextInput as DefaultTextInput } from 'react-native';
-import { FontAwesome as DefaultFontAwesome} from '@expo/vector-icons';
+import { FontAwesome as DefaultFontAwesome } from '@expo/vector-icons';
 
 import Colors from '../constants/Colors';
 
@@ -51,6 +51,13 @@ export function TextInput(props: TextInputProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 
   return <DefaultTextInput style={[{ color }, style]} {...otherProps} />;
+}
+
+export function FontAwesome(props: FontAwesomeProps) {
+  const { style, lightColor, darkColor, ...otherProps } = props;
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+
+  return <DefaultFontAwesome style={[{ color }, style]} {...otherProps} />;
 }
 
 export function FontAwesomeButton(props: FontAwesomeProps) {
