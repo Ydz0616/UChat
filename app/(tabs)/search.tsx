@@ -13,7 +13,7 @@ interface Person {
 
 export default function TabOneScreen() {
   const [isLoading, setIsLoading] = useState(true)
-  const [refresh, setRefresh] = useState(0)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [searchTerm, setSearchTerm] = useState('');
   const [userHobbies, setUserHobbies] = useState<Person[]>([]);
   const [userFriends, setUserFriends] = useState(new Set())
@@ -21,8 +21,13 @@ export default function TabOneScreen() {
   const [profilePicture, setProfilePicture] = useState('');
   const [searchResults, setSearchResults] = useState<Person[]>([])
   const user = FIREBASE_AUTH.currentUser;
-  const fetchData = async () => {
-    setIsLoading(true)
+  const fetchData = async (initial: boolean) => {
+    if (initial) {
+      setIsLoading(true)
+    }
+    else {
+      setIsRefreshing(true)
+    }
     // TODO: add timeout
 
     try {
@@ -72,11 +77,16 @@ export default function TabOneScreen() {
       
       setUserHobbies(hobbiesData);
 
-      if (refresh == 0) {
+      if (initial) {
         search(searchTerm, hobbiesData)
       }
 
-      setIsLoading(false)
+      if (initial) {
+        setIsLoading(false)
+      }
+      else {
+        setIsRefreshing(false)
+      }
     } catch (error) {
       console.error(error);
     }
@@ -84,8 +94,8 @@ export default function TabOneScreen() {
 
   // only fetch all users on initial load
   useEffect(() => {
-    fetchData();
-  }, [refresh]);
+    fetchData(true);
+  }, []);
 
   const search = (newSearchTerm: string, hobbies?: Person[]) => {
     if (!hobbies) {
@@ -133,7 +143,7 @@ export default function TabOneScreen() {
         status: 'pending',
         timestamp: serverTimestamp()
       })
-      Alert.alert(`Friend Request Sent to ${receiverUsername}!`, '', [{text: 'OK', onPress: () => setRefresh(refresh + 1)}])
+      Alert.alert(`Friend Request Sent to ${receiverUsername}!`, '', [{text: 'OK', onPress: () => fetchData(false)}])
     } catch (error) {
       console.error(error)
     }
@@ -156,6 +166,8 @@ export default function TabOneScreen() {
       {searchResults.length > 0 && !isLoading ? (
         <FlatList
           data={searchResults}
+          onRefresh={() => fetchData(false)}
+          refreshing={isRefreshing}
           renderItem={({ item, index }) => (
             <View style={styles.resultContainer}>
               <View style={styles.userInfoContainer}>
@@ -188,7 +200,7 @@ export default function TabOneScreen() {
           )}
           keyExtractor={(item) => item.uid}
         />
-      ) : <Text>No results</Text>}
+      ) : !isLoading ? <Text>No results match your search</Text> : null}
     </View>
   );
   
