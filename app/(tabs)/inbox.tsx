@@ -24,6 +24,7 @@ export default function TabOneScreen() {
         querySnapshot.forEach((doc) => {
           const request = doc.data() as any; // Type assertion
           if (request?.status === 'pending') {
+            console.log('Req:', request)
             updatedNotifications.push(request);
           }
         });
@@ -123,6 +124,7 @@ export default function TabOneScreen() {
       {userNotifications.length > 0 ?
         <FlatList
           data={userNotifications}
+          keyExtractor={item => item?.type + item?.receiver + item?.sender}
           renderItem={({ item }) => (
             <View style={styles.resultContainer}>
               {/* TODO: account for other notification types */}
@@ -143,7 +145,6 @@ export default function TabOneScreen() {
                 : <Text>Not Currently Handled</Text>}
             </View>
           )}
-          keyExtractor={item => item.uid}
         />
         : <Text style={styles.modalText}>No notifications</Text>}
     </View>
@@ -209,12 +210,10 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 18,
-    color: 'initial',
     fontWeight: 'bold'
   },
   message: {
     fontSize: 16,
-    color: 'initial',
   },
   messageHighlight: {
     fontSize: 16,
