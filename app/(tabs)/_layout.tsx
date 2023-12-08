@@ -1,7 +1,9 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
+import { Link, Tabs, router, useNavigation } from 'expo-router';
 import { Pressable, useColorScheme } from 'react-native';
+import React, { useState, useEffect } from 'react';
 
+import { Accelerometer } from 'expo-sensors';
 import Colors from '../../constants/Colors';
 
 /**
@@ -20,6 +22,26 @@ export const unstable_settings = {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const [isShaking, setShaking] = useState(false);
+  
+  useEffect(() => {
+    const subscription = Accelerometer.addListener((accelerometerData) => {
+      const { x, y, z } = accelerometerData;
+      const acceleration = Math.sqrt(x ** 2 + y ** 2 + z ** 2);
+      const shakeThreshold = 1.2;
+
+      if (acceleration > shakeThreshold) {
+        router.replace('/search');
+        setShaking(true);
+      } else {
+        setShaking(false);
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   return (
     <Tabs
