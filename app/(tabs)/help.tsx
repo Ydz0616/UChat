@@ -93,7 +93,7 @@ export default function TabOneScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={[{flex:1, alignItems:'center', justifyContent: 'space-around' }]}>
+    <View style={[{flex:1, alignItems:'center', justifyContent: 'space-around' }]}>
       <View style={styles.container}>
         <Text style={styles.header}>Report User</Text>
         <TextInput
@@ -145,7 +145,7 @@ export default function TabOneScreen() {
         <Button title='Send' onPress={handleContactSubmit} />
       </View>
 
-    </ScrollView>
+    </View>
   );
 }
 
