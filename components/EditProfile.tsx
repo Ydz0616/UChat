@@ -131,7 +131,8 @@ export default function EditProfile(props: EditProfileProps) {
             major: major,
             hobbies: hobbies.map(hobby => hobby.trim().toLowerCase()),
             phoneNumber: phoneNumber,
-            profilepic: profilePicture
+            profilepic: profilePicture,
+            email: user.email
           });
         }
         else {
@@ -144,6 +145,7 @@ export default function EditProfile(props: EditProfileProps) {
             hobbies: hobbies.map(hobby => hobby.trim().toLowerCase()),
             phoneNumber: phoneNumber,
             profilepic: profilePicture,
+            email: user.email,
             chatting: false
           });
         }
