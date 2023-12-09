@@ -40,12 +40,14 @@ export async function CreateChat(otherUserUid: string) {
                 id: combinedID,
                 users: [currentUser?.uid, otherUserUid],
                 messages: [],
-                chatting: true
+                chatting: true,
+                connection: "none"
               })
             }
             else{
               await updateDoc(doc(db, 'chats',combinedID), {
                 chatting:true,
+                connection: "none",
                 messages:[] // clear messages   
               })
             }
