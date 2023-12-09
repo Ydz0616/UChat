@@ -5,6 +5,7 @@
 
 import { Text as DefaultText, useColorScheme, View as DefaultView, TextInput as DefaultTextInput } from 'react-native';
 import { FontAwesome as DefaultFontAwesome } from '@expo/vector-icons';
+import {default as DefaultDropDownPicker, DropDownPickerProps as DefaultDropDownPickerProps, ValueType, ThemeNameType } from 'react-native-dropdown-picker';
 
 import Colors from '../constants/Colors';
 
@@ -13,10 +14,16 @@ type ThemeProps = {
   darkColor?: string;
 };
 
+type ThemeTextInputProps = { 
+  lightPlaceholderTextColor?: string;
+  darkPlaceholderTextColor?: string;
+}
+
 export type TextProps = ThemeProps & DefaultText['props'];
 export type ViewProps = ThemeProps & DefaultView['props'];
-export type TextInputProps = ThemeProps & DefaultTextInput['props'];
+export type TextInputProps = ThemeProps & DefaultTextInput['props'] & ThemeTextInputProps;
 export type FontAwesomeProps = ThemeProps & DefaultFontAwesome['props'];
+export type DropDownPickerProps = ThemeProps & DefaultDropDownPickerProps<ValueType>;
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
@@ -47,10 +54,11 @@ export function View(props: ViewProps) {
 }
 
 export function TextInput(props: TextInputProps) {
-  const { style, lightColor, darkColor, ...otherProps } = props;
+  const { style, lightColor, darkColor, lightPlaceholderTextColor, darkPlaceholderTextColor, ...otherProps } = props;
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const placeholderTextColor = useThemeColor({ light: lightPlaceholderTextColor, dark: darkPlaceholderTextColor }, 'placeholderText');
 
-  return <DefaultTextInput style={[{ color }, style]} {...otherProps} />;
+  return <DefaultTextInput style={[{ color }, style]} placeholderTextColor={placeholderTextColor} {...otherProps} />;
 }
 
 export function FontAwesome(props: FontAwesomeProps) {
@@ -65,4 +73,9 @@ export function FontAwesomeButton(props: FontAwesomeProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 
   return <DefaultFontAwesome.Button color={color} {...otherProps} />;
+}
+
+export function DropDownPicker(props: DropDownPickerProps) {
+  const theme: ThemeNameType = useColorScheme()?.toUpperCase() == 'DARK' ? 'DARK' : 'LIGHT';
+  return <DefaultDropDownPicker {...props} theme={theme}/>;
 }

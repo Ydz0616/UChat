@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { StyleSheet, Button, Alert, ScrollView, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { Text, TextInput, View } from '../../components/Themed';
+import { StyleSheet, Button, Alert, ScrollView, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native';
+import { Text, TextInput, View, DropDownPicker } from '../../components/Themed';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
 import { collection, serverTimestamp, addDoc } from 'firebase/firestore';
-import DropDownPicker from 'react-native-dropdown-picker';
 
 
 export default function TabOneScreen() {
@@ -93,15 +92,18 @@ export default function TabOneScreen() {
   }
 
   return (
-    <KeyboardAvoidingView style={styles.container}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView contentContainerStyle={[{ flex: 1, alignItems: 'center', justifyContent: 'space-around' }]}>
+    <View style={styles.container}>
+      <KeyboardAvoidingView style={styles.container} behavior="padding" keyboardVerticalOffset={100}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView contentContainerStyle={styles.container}>
+            <View style={{ height: 10 }} />
             <Text style={styles.header}>Report User</Text>
             <TextInput
               style={styles.input}
               placeholder='Username'
               value={reportUser}
               onChangeText={setReportUser} />
+            <View style={{ height: 10 }} />
             <DropDownPicker
               open={reportCategoryOpen}
               placeholder='Category'
@@ -110,8 +112,9 @@ export default function TabOneScreen() {
               setOpen={setReportCategoryOpen}
               setValue={setReportCategory}
               setItems={setReportCategories}
-              style={[styles.input, { alignSelf: 'center' }]}
+              style={[styles.drowpdown, { alignSelf: 'center' }]}
             />
+            <View style={{ height: 10 }} />
             <TextInput
               multiline={true}
               numberOfLines={4}
@@ -119,10 +122,12 @@ export default function TabOneScreen() {
               placeholder='What should we know?'
               value={reportDescription}
               onChangeText={setReportDescription} />
-
+            <View style={{ height: 10 }} />
             <Button title='Submit Report' onPress={handleReportSubmit} />
-            
+            <View style={{ height: 20 }} />
+
             <Text style={styles.header}>Contact Developers</Text>
+            <View style={{ height: 10 }} />
             <DropDownPicker
               open={contactCategoryOpen}
               placeholder='Category'
@@ -131,8 +136,9 @@ export default function TabOneScreen() {
               setOpen={setContactCategoryOpen}
               setValue={setContactCategory}
               setItems={setContactCategories}
-              style={[styles.input, { alignSelf: 'center' }]}
+              style={[styles.drowpdown, { alignSelf: 'center' }]}
             />
+            <View style={{ height: 10 }} />
             <TextInput
               multiline={true}
               numberOfLines={4}
@@ -140,43 +146,43 @@ export default function TabOneScreen() {
               placeholder='Please include as much information as possible'
               value={contactDescription}
               onChangeText={setContactDescription} />
+            <View style={{ height: 10 }} />
             <Button title='Send' onPress={handleContactSubmit} />
-        </ScrollView>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+            <View style={{ height: 10 }} />
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     alignItems: 'center',
-    width: '100%'
+    justifyContent: 'center',
   },
   header: {
     fontSize: 20,
     fontWeight: 'bold',
   },
   input: {
-    borderBottomColor: 'black',
+    borderBottomColor: 'gray',
     borderBottomWidth: 1,
     padding: 5,
     marginTop: 15,
     marginBottom: 10,
     width: 250,
-    backgroundColor: 'transparent',
+  },
+  drowpdown: {
+    borderWidth: 1,
+    borderColor: 'gray',
+    width: 250,
   },
   button: {
     marginTop: 15,
     borderRadius: 20,
     padding: 10,
     elevation: 2,
-  },
-  buttonOpen: {
-    backgroundColor: '#F194FF',
-  },
-  buttonClose: {
-    backgroundColor: '#2196F3',
   },
 });

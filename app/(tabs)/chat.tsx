@@ -247,7 +247,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     paddingBottom: 10,
-    backgroundColor: 'white',
   },
   input: {
     flex: 1,
@@ -255,7 +254,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 30,
-    backgroundColor: '#F0F0F0',
+    borderWidth: 1,
+    borderColor: 'gray',
   },
   sendButton: {
     color: '#007BFF',
