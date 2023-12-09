@@ -1,29 +1,33 @@
 import { StatusBar } from 'expo-status-bar';
-import { Platform, StyleSheet ,Button,useColorScheme, Alert} from 'react-native';
-import { FIREBASE_DB, FIREBASE_AUTH,FIREBASE_RTDB } from '../firebaseConfig';
-import { collection, query, where,doc, onSnapshot,getDocs, updateDoc, setDoc} from 'firebase/firestore';
-import { Text, View } from '../components/Themed';
+import { Platform, StyleSheet, Button, useColorScheme, Alert } from 'react-native';
+import { FIREBASE_DB, FIREBASE_AUTH, FIREBASE_RTDB } from '../firebaseConfig';
+import { collection, query, where, doc, onSnapshot, getDocs, updateDoc, setDoc } from 'firebase/firestore';
+import { Text, View, FontAwesome } from '../components/Themed';
 import { useEffect, useState } from 'react';
-import ProfilePicture ,{defaultProfilePictureURL}from '../components/ProfilePicture';
+import ProfilePicture, { defaultProfilePictureURL } from '../components/ProfilePicture';
 import { ref, onValue } from "firebase/database";
+import { Timestamp, arrayUnion } from 'firebase/firestore';
 import { Router, router } from 'expo-router';
 export default function ModalScreen() {
 
-  const db  = FIREBASE_DB;
+  const db = FIREBASE_DB;
   const currentUser = FIREBASE_AUTH.currentUser;
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
   const textColor = isDarkMode ? 'white' : 'black';
   const [showChat, setShowChat] = useState(false);
   const [combinedID, setCombinedID] = useState('' as any)
-  const [avatar, setAvatar] = useState('' as any) 
-  const [name, setName] = useState('' as any) 
+  const [connection, setConnection] = useState(null as any)
+  const [avatar, setAvatar] = useState('' as any)
+  const [name, setName] = useState('' as any)
   const [major, setMajor] = useState('' as any)
   const [classYear, setClassYear] = useState('' as any)
   const [hobbies, setHobbies] = useState([] as any)
   const [uid, setUid] = useState('' as any)
-  const [online, setOnline] = useState(false) 
-  const rtdb = FIREBASE_RTDB; 
+  const [online, setOnline] = useState(false)
+  const [email, setEmail] = useState('' as any)
+  const [phoneNumber, setPhoneNumber] = useState('' as any)
+  const rtdb = FIREBASE_RTDB;
   const majorsMap = new Map([
     ['cs', 'Computer Science'],
     ['ece', 'Electrical Engineering'],
@@ -39,38 +43,39 @@ export default function ModalScreen() {
   ]);
 
   const fetchData = async () => {
-    
-    try{
+
+    try {
       const notificationsRef = collection(FIREBASE_DB, 'chats');
       // the queryRef should be the doc that the current user is in the users array and the chatting is ture
-      const queryRef = query(notificationsRef, where('users', 'array-contains', currentUser?.uid),where('chatting','==',true));
+      const queryRef = query(notificationsRef, where('users', 'array-contains', currentUser?.uid), where('chatting', '==', true));
 
       const eventlistener = onSnapshot(queryRef, (querySnapshot) => {
         var uid = null
 
-        if(!querySnapshot.empty){setShowChat(true)}
+        if (!querySnapshot.empty) { setShowChat(true) }
 
         querySnapshot.forEach((doc) => {
           var chatData = doc.data();
-          if(chatData.users[0] == currentUser?.uid){
+          if (chatData.users[0] == currentUser?.uid) {
             // get the user data from the second user from users collection where the uid is the second user
             uid = chatData.users[1]
           }
-          if(chatData.users[1] == currentUser?.uid){
+          if (chatData.users[1] == currentUser?.uid) {
             // get the user data from the second user from users collection where the uid is the second user
             uid = chatData.users[0]
           }
-          if(uid!){
+          if (uid!) {
             setUid(uid)
           }
           const combinedID = currentUser?.uid! > uid!
             ? currentUser?.uid + uid!
             : uid! + currentUser?.uid;
           setCombinedID(combinedID)
+          setConnection(chatData.connection)
           getUserData(uid!)
         })
-        if(querySnapshot.empty){
-          console.log('empty') 
+        if (querySnapshot.empty) {
+          console.log('empty')
           return
         }
       })
@@ -78,7 +83,7 @@ export default function ModalScreen() {
         // Unsubscribe from the snapshot listener when component unmounts
         eventlistener();
       };
-    }catch(error){console.log(error)}
+    } catch (error) { console.log(error) }
   }
 
 
@@ -89,10 +94,10 @@ export default function ModalScreen() {
 
 
   const abortChat = async () => {
-    try{
+    try {
       // update the doc in the chats collection where the combined ID is its identifier and set the chatting to false
-      
-      await updateDoc(doc(db,'chats',combinedID), {
+
+      await updateDoc(doc(db, 'chats', combinedID), {
         chatting: false
       })
       const querySnapshot = await getDocs(
@@ -110,11 +115,11 @@ export default function ModalScreen() {
         });
         Alert.alert('Chat Aborted')
       }
-      
-    }catch(error){console.log(error)}
+
+    } catch (error) { console.log(error) }
   }
   const reportUser = async () => {
-    try{
+    try {
       // update the doc in the chats collection where the combined ID is its identifier and set the chatting to false
       router.replace('/(tabs)/help')
       // await updateDoc(doc(db,'chats',combinedID), {
@@ -142,10 +147,10 @@ export default function ModalScreen() {
       //   })
       //   Alert.alert('User Reported') 
       // }
-      
-    }catch(error){console.log(error)}
+
+    } catch (error) { console.log(error) }
   }
-  const getUserData = async (uid:any) =>{
+  const getUserData = async (uid: any) => {
     const querySnapshot = await getDocs(
       query(collection(db, 'users'), where('uid', '==', uid))
     );
@@ -155,66 +160,161 @@ export default function ModalScreen() {
     setMajor(querySnapshot.docs[0].data().major)
     setClassYear(querySnapshot.docs[0].data().classYear)
     setHobbies(querySnapshot.docs[0].data().hobbies)
+    setEmail(querySnapshot.docs[0].data().email)
+    setPhoneNumber(querySnapshot.docs[0].data().phoneNumber)
     // fectch the online status from realtime database 'status / state'
     const userStatusDatabaseRef = ref(rtdb, `/status/${uid}`);
     onValue(userStatusDatabaseRef, (snapshot) => {
       console.log(snapshot.val())
-      if(snapshot.val().state == 'online'){
+      if (snapshot.val().state == 'online') {
         setOnline(true)
-      }else{
+      } else {
         setOnline(false)
       }
     });
 
-    
+
   }
+
+  const sendConnectRequest = async () => {
+    Alert.alert(`Connect with ${name}`,
+      `${name} will be notified of your connection request. If they agree to connect, you emails and phone numbers will be exchanged.`, [
+      {
+        text: 'Cancel',
+        style: "cancel"
+      },
+      {
+        text: "Connect", onPress: async () => {
+          try {
+            const newMessageObj = { id: Timestamp.now(), text: "I've sent you a connection request. Tap (i) to accept.", sender_id: currentUser?.uid };
+            await updateDoc(doc(db, 'chats', combinedID), {
+              connection: currentUser?.uid,
+              messages: arrayUnion(newMessageObj)
+            })
+          } catch (error) { console.log(error) }
+        }
+      }
+    ]);
+  }
+
+  const acceptConnectRequest = async () => {
+    Alert.alert(`Connect with ${name}`,
+      `${name} will be notified of your acceptance. Your emails and phone numbers will be exchanged immediately.`, [
+      {
+        text: 'Cancel',
+        style: "cancel"
+      },
+      {
+        text: "Connect", onPress: async () => {
+          try {
+            const newMessageObj = { id: Timestamp.now(), text: "I've accepted your connection request. Tap (i) to view my email and phone number.", sender_id: currentUser?.uid };
+            await updateDoc(doc(db, 'chats', combinedID), {
+              connection: "done",
+              messages: arrayUnion(newMessageObj)
+            })
+          } catch (error) { console.log(error) }
+        }
+      }
+    ]);
+  }
+
+  const showVerifiedAlert = () => {
+    Alert.alert(`Verified Information`,
+      `Email: ${email}`, [
+      {
+        text: 'OK',
+        style: "cancel"
+      }
+    ]);
+  }
+
+  const getConnectView = () => {
+    console.log("connection", connection, "end")
+    switch(connection){
+      case 'none':
+        return <Button title="Connect" onPress={sendConnectRequest} />
+      case currentUser?.uid:
+        return <Text style={[styles.details, { color: textColor, fontStyle: 'italic' }]}>Connection Request Pending...</Text>
+      case uid:
+        return <Button title="Accept Connect Request" onPress={acceptConnectRequest} />
+      case 'done':
+        return [
+          <View key="1" style={{flexDirection: "row", alignItems: "center"}}>
+            <FontAwesome name="check" size={24} color="black" style={{opacity: 0}}/>
+            <View style={{width: 10}} />
+            <Text style={[styles.details, { color: textColor }]}>{email}</Text>
+            <View style={{width: 10}} />
+            <FontAwesome name="check" size={24} color="black" onPress={showVerifiedAlert}/>
+          </View>,
+          <Text key="2" style={[styles.details, { color: textColor }]}>{phoneNumber}</Text>,
+          <Text key="3" style={[styles.details, { color: textColor, fontStyle: 'italic' }]}>Connection Established</Text>
+        ]
+      case null:
+        return <></>
+      default:
+        try {
+          console.log("update doc")
+          updateDoc(doc(db, 'chats', combinedID), {
+            connection: "none"
+          })
+        } catch (error) { console.log(error) }
+        return <></>
+    }
+  }
+
   return (
-  <View style={styles.container}>
-    {showChat ? (
-      <View>
-        <View style={styles.centerContent}>
+    <View style={styles.container}>
+      {showChat ? (
+        <View>
+          <View style={styles.centerContent}>
             <ProfilePicture profilePicture={avatar || defaultProfilePictureURL} />
             {online ? (
               <View style={[styles.onlineDot, { backgroundColor: 'green' }]} />
             ) : (
               <View style={[styles.onlineDot, { backgroundColor: 'red' }]} />
             )}
+          </View>
+          <View style={styles.centerContent}>
+            <Text style={styles.title}>{name}</Text>
+            <Text style={[styles.details, { color: textColor }]}>{classYear}</Text>
+            <Text style={[styles.details, { color: textColor }]}>{majorsMap.get(major)}</Text>
+
+            {hobbies.map((hobby: any, index: any) => (
+              <Text key={index} style={[styles.details, { color: textColor }]}>
+                {hobby}
+              </Text>
+            ))}
+
+            <Text style={[styles.details, { color: textColor }]}>{online ? 'Online' : 'Offline'}</Text>
+
+            {getConnectView()}
+
+            <View style={{ height: 20 }} />
+
+            <Button title='Abort Chat' color='red' onPress={abortChat}></Button>
+            <Button title='Report User' color='red' onPress={reportUser}></Button>
+          </View>
         </View>
-        <View style={styles.centerContent}>
-        <Text style={styles.title}>{name}</Text>
-        <Text style={[styles.details, { color: textColor }]}>{classYear}</Text>
-        <Text style={[styles.details, { color: textColor }]}>{majorsMap.get(major)}</Text>
- 
-        {hobbies.map((hobby:any, index:any) => (
-        <Text key={index} style={[styles.details, { color: textColor }]}>
-              {hobby}
+      ) : (<View style={styles.container}>
+        <Text style={styles.title}>
+          Tips
         </Text>
-          ))}
 
-        <Text style={[styles.details, { color: textColor }]}>{online ? 'Online' : 'Offline'}</Text>
-        <Button title='Abort Chat' color = 'red' onPress={abortChat}></Button>
-        <Button title='Report User' color = 'red' onPress={reportUser}></Button>
-        </View>
-      </View>
-    ) : (<View style = {styles.container}>
-      <Text style={styles.title}>
-        Tips 
-      </Text>    
-       
-      {/* <View> <GetUser></GetUser></View> */}
-      <Text style = {styles.details}>
-        Go to search page to look for a user to chat with
-      </Text>
-      <Text style = {styles.details}>
-        Go to inbox page to receive friend requests
-      </Text>
+        {/* <View> <GetUser></GetUser></View> */}
+        <Text style={styles.details}>
+          Go to search page to look for a user to chat with
+        </Text>
+        <Text style={styles.details}>
+          Go to inbox page to receive friend requests
+        </Text>
 
 
-      <Text style = {styles.details}>
-        Go to profile page to edit your profile
-      </Text>
-    </View>)}
-  </View>
+        <Text style={styles.details}>
+          Go to profile page to edit your profile
+        </Text>
+      </View>)}
+      <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
+    </View>
 
   );
 }
@@ -223,7 +323,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent:'center',  
+    justifyContent: 'center',
   },
   centerContent: {
     justifyContent: 'center',
@@ -232,8 +332,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom:20,
-    
+    marginBottom: 20,
+
   },
   separator: {
     marginVertical: 30,
