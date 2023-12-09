@@ -27,10 +27,11 @@ export default function TabLayout() {
   useEffect(() => {
     const subscription = Accelerometer.addListener((accelerometerData) => {
       const { x, y, z } = accelerometerData;
-      const acceleration = Math.sqrt(x ** 2 + y ** 2 + z ** 2);
-      const shakeThreshold = 1.2;
+      const acceleration = Math.sqrt(x ** 2 + y ** 2 + (z/2) ** 2);
+      const shakeThreshold = 1.5;
 
       if (acceleration > shakeThreshold) {
+        console.log(`x: ${x}, y: ${y}, z: ${z}`)
         router.replace('/search');
         setShaking(true);
       } else {
