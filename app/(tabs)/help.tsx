@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Button, Alert, ScrollView } from 'react-native';
+import { StyleSheet, Button, Alert, ScrollView, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { Text, TextInput, View } from '../../components/Themed';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
 import { collection, serverTimestamp, addDoc } from 'firebase/firestore';
@@ -93,59 +93,57 @@ export default function TabOneScreen() {
   }
 
   return (
-    <View style={[{flex:1, alignItems:'center', justifyContent: 'space-around' }]}>
-      <View style={styles.container}>
-        <Text style={styles.header}>Report User</Text>
-        <TextInput
-          style={styles.input}
-          placeholder='Username'
-          value={reportUser}
-          onChangeText={setReportUser} />
-        <DropDownPicker
-          open={reportCategoryOpen}
-          placeholder='Category'
-          value={reportCategory}
-          items={reportCategories}
-          setOpen={setReportCategoryOpen}
-          setValue={setReportCategory}
-          setItems={setReportCategories}
-          style={[styles.input, { alignSelf: 'center' }]}
-        />
-        <TextInput
-          multiline={true}
-          numberOfLines={4}
-          style={styles.input}
-          placeholder='What should we know?'
-          value={reportDescription}
-          onChangeText={setReportDescription} />
+    <KeyboardAvoidingView style={styles.container}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={[{ flex: 1, alignItems: 'center', justifyContent: 'space-around' }]}>
+            <Text style={styles.header}>Report User</Text>
+            <TextInput
+              style={styles.input}
+              placeholder='Username'
+              value={reportUser}
+              onChangeText={setReportUser} />
+            <DropDownPicker
+              open={reportCategoryOpen}
+              placeholder='Category'
+              value={reportCategory}
+              items={reportCategories}
+              setOpen={setReportCategoryOpen}
+              setValue={setReportCategory}
+              setItems={setReportCategories}
+              style={[styles.input, { alignSelf: 'center' }]}
+            />
+            <TextInput
+              multiline={true}
+              numberOfLines={4}
+              style={styles.input}
+              placeholder='What should we know?'
+              value={reportDescription}
+              onChangeText={setReportDescription} />
 
-        <Button title='Submit Report' onPress={handleReportSubmit} />
-      </View>
-
-
-      <View style={styles.container}>
-        <Text style={styles.header}>Contact Developers</Text>
-        <DropDownPicker
-          open={contactCategoryOpen}
-          placeholder='Category'
-          value={contactCategory}
-          items={contactCategories}
-          setOpen={setContactCategoryOpen}
-          setValue={setContactCategory}
-          setItems={setContactCategories}
-          style={[styles.input, { alignSelf: 'center' }]}
-        />
-        <TextInput
-          multiline={true}
-          numberOfLines={4}
-          style={styles.input}
-          placeholder='Please include as much information as possible'
-          value={contactDescription}
-          onChangeText={setContactDescription} />
-        <Button title='Send' onPress={handleContactSubmit} />
-      </View>
-
-    </View>
+            <Button title='Submit Report' onPress={handleReportSubmit} />
+            
+            <Text style={styles.header}>Contact Developers</Text>
+            <DropDownPicker
+              open={contactCategoryOpen}
+              placeholder='Category'
+              value={contactCategory}
+              items={contactCategories}
+              setOpen={setContactCategoryOpen}
+              setValue={setContactCategory}
+              setItems={setContactCategories}
+              style={[styles.input, { alignSelf: 'center' }]}
+            />
+            <TextInput
+              multiline={true}
+              numberOfLines={4}
+              style={styles.input}
+              placeholder='Please include as much information as possible'
+              value={contactDescription}
+              onChangeText={setContactDescription} />
+            <Button title='Send' onPress={handleContactSubmit} />
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
