@@ -1,4 +1,5 @@
 import { initializeApp } from 'firebase/app';
+import { getDatabase } from "firebase/database";
 import { getFirestore, initializeFirestore } from "firebase/firestore";
 import { initializeAuth, getAuth, getReactNativePersistence } from "firebase/auth";
 import "firebase/firestore";
@@ -31,16 +32,15 @@ const firebaseConfig = {
   appId: APP_ID,
 //   measurementId: 'G-measurement-id',
 };
-
 const FIREBASE_APP = initializeApp(firebaseConfig);
 const FIREBASE_DB = initializeFirestore(FIREBASE_APP, { experimentalForceLongPolling: true });
+const FIREBASE_RTDB = getDatabase(FIREBASE_APP);
 initializeAuth(FIREBASE_APP, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage)
 });
 const FIREBASE_AUTH = getAuth(FIREBASE_APP);
-
 // let app and db be visable to all files that import firebaseConfig.js
-export { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH };
+export { FIREBASE_APP, FIREBASE_DB, FIREBASE_AUTH, FIREBASE_RTDB};
 
 // For more information on how to access Firebase in your project,
 // see the Firebase documentation: https://firebase.google.com/docs/web/setup#access-firebase

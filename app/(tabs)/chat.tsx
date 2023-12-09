@@ -2,19 +2,51 @@ import { FlatList, KeyboardAvoidingView, SafeAreaView, StyleSheet,Image } from '
 import { Text, View , TextInput} from '../../components/Themed';
 import React, { useState,useEffect, useRef } from 'react';
 import { TouchableOpacity } from 'react-native';
-import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
+import { FIREBASE_DB, FIREBASE_AUTH ,FIREBASE_RTDB} from '../../firebaseConfig';
 import { collection, query, where,  updateDoc, onSnapshot,doc, getDocs, Timestamp, arrayUnion} from 'firebase/firestore';
-
+import { onDisconnect, ref, serverTimestamp, set,getDatabase, get} from "firebase/database";
+import Icon from '@expo/vector-icons/FontAwesome';
 export default function TabTwoScreen() {
-
-
   const flatListRef = useRef<FlatList | null>(null);
   const [newMessage, setNewMessage] = useState('');
-  const  [messages, setMessages] = useState()
+  const  [messages, setMessages] = useState([] as any[])
   const [showChat, setShowChat] = useState(false);
+  const [combinedID, setCombinedID] = useState('' as any)
   const db  = FIREBASE_DB;
   const currentUser = FIREBASE_AUTH.currentUser;
-  const [combinedID, setCombinedID] = useState('' as any)
+  const uid = currentUser?.uid;
+  const realtimeDatabase = FIREBASE_RTDB;
+  const userStatusDatabaseRef = ref(realtimeDatabase, `/status/${uid}`);
+  useEffect(() => {
+    // Set initial status to 'online' when the component mounts
+    if (userStatusDatabaseRef) {
+      set(userStatusDatabaseRef, {
+        state: 'online',
+        last_changed: serverTimestamp(),
+      });
+    }
+  
+    return () => {
+      // Clean up: Set user status to 'offline' when the component unmounts
+      if (userStatusDatabaseRef) {
+        set(userStatusDatabaseRef, {
+          state: 'offline',
+          last_changed: serverTimestamp(),
+        });
+      }
+    };
+  }, [currentUser, userStatusDatabaseRef]);
+
+  useEffect(() => {
+    // Set up onDisconnect to handle user status when disconnected
+    if (userStatusDatabaseRef) {
+      onDisconnect(userStatusDatabaseRef).set({
+        state: 'offline',
+        last_changed: serverTimestamp(),
+      });
+    }
+  }, [userStatusDatabaseRef]);
+    
   const fetchData = async () => {
   var uid = null
     try {
@@ -65,25 +97,13 @@ export default function TabTwoScreen() {
   }, []);
 
 
+
   const getUserData = async (uid:any) =>{
     const querySnapshot = await getDocs(
       query(collection(FIREBASE_DB, 'users'), where('uid', '==', uid))
     );
-
     console.log(querySnapshot.docs[0].data())
-
-    
   }
-
-
-  // Define a function to handle the button click and show the ChatPage
-  const handleAcceptRequest = () => {
-    //TODO:  navigate to the search page
-    console.log('navigating')
-    // Please COMMENT BELOW when implemented the navigation
-    setShowChat(true)
-  };
-
 
   const handleSendMessage = async() => {
     if (newMessage.trim() === '') {
@@ -91,12 +111,10 @@ export default function TabTwoScreen() {
     }
     if(currentUser?.uid){
       try{
-        
         const newMessageObj = { id: Timestamp.now(), text: newMessage, sender_id:currentUser?.uid};
         await updateDoc(doc(db,'chats',combinedID),{
           messages:arrayUnion(newMessageObj)
         });
-        
         setNewMessage('');
       }catch(error){
         console.log(error);
@@ -109,12 +127,7 @@ export default function TabTwoScreen() {
     <View style={styles.container}>
       {showChat ? (
         <SafeAreaView style={{ flex: 1 }}>
-        {/* <View style={styles.userHeader}>
-        <View style={styles.avatarContainer}>
-          <Image source={{ uri: avatar }} style={styles.avatar} />
-          <Text style={styles.userName}>{name}</Text>
-        </View>
-        </View> */}
+          
         <FlatList style={{ marginTop: 20}} 
           data={messages}
           // keyExtractor={(item) => item.id}
@@ -154,7 +167,7 @@ export default function TabTwoScreen() {
             onChangeText={(text) => setNewMessage(text)}
           />
           <TouchableOpacity onPress={handleSendMessage}>
-            <Text style={styles.sendButton}>Send</Text>
+            <Icon name="send" size={24} color="#007BFF" style={styles.sendButton} ></Icon>
           </TouchableOpacity>
           </View>
           
@@ -173,15 +186,11 @@ export default function TabTwoScreen() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
-    
-  
   userHeader: {
-
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between', // Adjust alignment as needed
+    justifyContent: 'space-between',
     paddingHorizontal: 10,
     paddingVertical: 5,
   },
@@ -193,22 +202,22 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    marginBottom: 5, // Add spacing between avatar and name
+    marginBottom: 5,
   },
   iconContainer: {
-    // Style your icon container here
-    padding: 10, // Adjust the padding as needed
+    padding: 10,
   },
   userName: {
     fontSize: 16,
     fontWeight: 'bold',
   },
-  
   messageContainer: {
     maxWidth: '80%',
     borderRadius: 10,
     padding: 10,
     marginBottom: 10,
+    flexDirection: 'row', // Added for avatar placement
+    alignItems: 'center', // Added for avatar placement
   },
   inputContainer: {
     flexDirection: 'row',
@@ -231,7 +240,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    
     alignItems: 'center',
     justifyContent: 'center',
   },
