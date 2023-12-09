@@ -1,12 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
 import { Platform, StyleSheet ,Button,useColorScheme, Alert} from 'react-native';
-import { FIREBASE_DB, FIREBASE_AUTH } from '../firebaseConfig';
+import { FIREBASE_DB, FIREBASE_AUTH,FIREBASE_RTDB } from '../firebaseConfig';
 import { collection, query, where,doc, onSnapshot,getDocs, updateDoc, setDoc} from 'firebase/firestore';
 import { Text, View } from '../components/Themed';
 import { useEffect, useState } from 'react';
 import ProfilePicture ,{defaultProfilePictureURL}from '../components/ProfilePicture';
-
-
+import { ref, onValue } from "firebase/database";
+import { Router, router } from 'expo-router';
 export default function ModalScreen() {
 
   const db  = FIREBASE_DB;
@@ -22,6 +22,8 @@ export default function ModalScreen() {
   const [classYear, setClassYear] = useState('' as any)
   const [hobbies, setHobbies] = useState([] as any)
   const [uid, setUid] = useState('' as any)
+  const [online, setOnline] = useState(false) 
+  const rtdb = FIREBASE_RTDB; 
   const majorsMap = new Map([
     ['cs', 'Computer Science'],
     ['ece', 'Electrical Engineering'],
@@ -114,32 +116,32 @@ export default function ModalScreen() {
   const reportUser = async () => {
     try{
       // update the doc in the chats collection where the combined ID is its identifier and set the chatting to false
-      
-      await updateDoc(doc(db,'chats',combinedID), {
-        chatting: false
-      })
-      const querySnapshot = await getDocs(
-        query(collection(db, 'users'), where('uid', '==', currentUser?.uid))
-      );
-      const querySnapshot2 = await getDocs(query(collection(db, 'users'), where('uid', '==', uid)))
-      if (querySnapshot.docs.length > 0 && querySnapshot2.docs.length > 0) {
-        const existingDocRef = querySnapshot.docs[0].ref;
-        await updateDoc(existingDocRef, {
-          chatting: false,
-        });
-        const existingDocRef2 = querySnapshot2.docs[0].ref;
-        await updateDoc(existingDocRef2, {
-          chatting: false,
-        });
-        // upload a doc to report collection with the uid of reporter and the uid of the reported user and the type
-        await setDoc(doc(db,'report',combinedID),{
-          reporter: currentUser?.uid,
-          reported: uid,
-          id: combinedID,
-          type: 'harassment'
-        })
-        Alert.alert('User Reported') 
-      }
+      router.replace('/(tabs)/help')
+      // await updateDoc(doc(db,'chats',combinedID), {
+      //   chatting: false
+      // })
+      // const querySnapshot = await getDocs(
+      //   query(collection(db, 'users'), where('uid', '==', currentUser?.uid))
+      // );
+      // const querySnapshot2 = await getDocs(query(collection(db, 'users'), where('uid', '==', uid)))
+      // if (querySnapshot.docs.length > 0 && querySnapshot2.docs.length > 0) {
+      //   const existingDocRef = querySnapshot.docs[0].ref;
+      //   await updateDoc(existingDocRef, {
+      //     chatting: false,
+      //   });
+      //   const existingDocRef2 = querySnapshot2.docs[0].ref;
+      //   await updateDoc(existingDocRef2, {
+      //     chatting: false,
+      //   });
+      //   // upload a doc to report collection with the uid of reporter and the uid of the reported user and the type
+      //   await setDoc(doc(db,'report',combinedID),{
+      //     reporter: currentUser?.uid,
+      //     reported: uid,
+      //     id: combinedID,
+      //     type: 'harassment'
+      //   })
+      //   Alert.alert('User Reported') 
+      // }
       
     }catch(error){console.log(error)}
   }
@@ -147,28 +149,52 @@ export default function ModalScreen() {
     const querySnapshot = await getDocs(
       query(collection(db, 'users'), where('uid', '==', uid))
     );
-
     console.log(querySnapshot.docs[0].data())
     setName(querySnapshot.docs[0].data().username)
     setAvatar(querySnapshot.docs[0].data().profilepic)
     setMajor(querySnapshot.docs[0].data().major)
     setClassYear(querySnapshot.docs[0].data().classYear)
     setHobbies(querySnapshot.docs[0].data().hobbies)
+    // fectch the online status from realtime database 'status / state'
+    const userStatusDatabaseRef = ref(rtdb, `/status/${uid}`);
+    onValue(userStatusDatabaseRef, (snapshot) => {
+      console.log(snapshot.val())
+      if(snapshot.val().state == 'online'){
+        setOnline(true)
+      }else{
+        setOnline(false)
+      }
+    });
+
     
   }
   return (
   <View style={styles.container}>
     {showChat ? (
       <View>
-        <ProfilePicture profilePicture={avatar ||  defaultProfilePictureURL} />
+        <View style={styles.centerContent}>
+            <ProfilePicture profilePicture={avatar || defaultProfilePictureURL} />
+            {online ? (
+              <View style={[styles.onlineDot, { backgroundColor: 'green' }]} />
+            ) : (
+              <View style={[styles.onlineDot, { backgroundColor: 'red' }]} />
+            )}
+        </View>
+        <View style={styles.centerContent}>
         <Text style={styles.title}>{name}</Text>
-        <Text style={[styles.details, { color: textColor }]}>Class Year: {classYear}</Text>
-        <Text style={[styles.details, { color: textColor }]}>Major: {majorsMap.get(major)}</Text>
-        <Text style={[styles.details, { color: textColor }]}>Hobbies: {hobbies.join(", ")}</Text>
-        
+        <Text style={[styles.details, { color: textColor }]}>{classYear}</Text>
+        <Text style={[styles.details, { color: textColor }]}>{majorsMap.get(major)}</Text>
+ 
+        {hobbies.map((hobby:any, index:any) => (
+        <Text key={index} style={[styles.details, { color: textColor }]}>
+              {hobby}
+        </Text>
+          ))}
+
+        <Text style={[styles.details, { color: textColor }]}>{online ? 'Online' : 'Offline'}</Text>
         <Button title='Abort Chat' color = 'red' onPress={abortChat}></Button>
         <Button title='Report User' color = 'red' onPress={reportUser}></Button>
-        
+        </View>
       </View>
     ) : (<View style = {styles.container}>
       <Text style={styles.title}>
@@ -199,6 +225,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent:'center',  
   },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -210,10 +240,30 @@ const styles = StyleSheet.create({
     height: 1,
     width: '80%',
   },
+  avatarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
   details: {
     fontSize: 15,
     marginVertical: 10,
-    
+  },
+  profileContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+  },
+
+  onlineDot: {
+    width: 15,
+    height: 15,
+    borderRadius: 7.5,
+    backgroundColor: 'green', // Default to green; you can customize as needed
+    position: 'absolute',
+    top: 0,
+    right: 10,
+    zIndex: 1, // Ensure the dot is above the profile picture
   },
 });
 
