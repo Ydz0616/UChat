@@ -3,8 +3,8 @@ import { Text, View , TextInput} from '../../components/Themed';
 import React, { useState,useEffect, useRef } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { FIREBASE_DB, FIREBASE_AUTH ,FIREBASE_RTDB} from '../../firebaseConfig';
-import { collection, query, where,  updateDoc, onSnapshot,doc, getDocs, Timestamp, arrayUnion} from 'firebase/firestore';
-import { onDisconnect, ref, serverTimestamp, set,getDatabase, get} from "firebase/database";
+import { collection, query, where,  updateDoc, setDoc,onSnapshot,doc, getDocs, Timestamp, arrayUnion,serverTimestamp as serverTimestampFirestore} from 'firebase/firestore';
+import { onDisconnect, ref, serverTimestamp, set,onValue} from "firebase/database";
 import Icon from '@expo/vector-icons/FontAwesome';
 export default function TabTwoScreen() {
   const flatListRef = useRef<FlatList | null>(null);
@@ -17,36 +17,59 @@ export default function TabTwoScreen() {
   const uid = currentUser?.uid;
   const realtimeDatabase = FIREBASE_RTDB;
   const userStatusDatabaseRef = ref(realtimeDatabase, `/status/${uid}`);
-  useEffect(() => {
-    // Set initial status to 'online' when the component mounts
-    if (userStatusDatabaseRef) {
-      set(userStatusDatabaseRef, {
-        state: 'online',
-        last_changed: serverTimestamp(),
-      });
-    }
+  const userStatusFirestoreRef = doc(db, 'status', uid!);
+  const isOfflineForDatabase = {
+    state: 'offline',
+    last_changed: serverTimestamp(),
+  };
+  const isOnlineForDatabase = {
+    state: 'online',
+    last_changed: serverTimestamp(),
+  };
   
-    return () => {
-      // Clean up: Set user status to 'offline' when the component unmounts
-      if (userStatusDatabaseRef) {
-        set(userStatusDatabaseRef, {
-          state: 'offline',
-          last_changed: serverTimestamp(),
-        });
-      }
-    };
-  }, [currentUser, userStatusDatabaseRef]);
+// Firestore uses a different server timestamp value, so we'll 
+// create two more constants for Firestore state.
+  const isOfflineForFirestore = {
+    state: 'offline',
+    last_changed: serverTimestampFirestore(),
+  };
 
-  useEffect(() => {
-    // Set up onDisconnect to handle user status when disconnected
-    if (userStatusDatabaseRef) {
-      onDisconnect(userStatusDatabaseRef).set({
-        state: 'offline',
-        last_changed: serverTimestamp(),
-      });
+  const isOnlineForFirestore = {
+    state: 'online',
+    last_changed: serverTimestampFirestore(),
+  };
+
+  const connectedRef = ref(realtimeDatabase, '.info/connected');
+  onValue(connectedRef, (snapshot) => {
+    if (snapshot.val() === false) {
+      setDoc(userStatusFirestoreRef, isOfflineForFirestore);
+      console.log('offline')
+      return;
     }
-  }, [userStatusDatabaseRef]);
-    
+    onDisconnect(userStatusDatabaseRef).set(isOfflineForDatabase).then(() => {
+      set(userStatusDatabaseRef, isOnlineForDatabase);
+      setDoc(userStatusFirestoreRef, isOnlineForFirestore);
+    }
+    );
+  });
+
+  const statusCollectionRef = collection(db, 'status');
+
+  const onlineStatusQuery = query(statusCollectionRef, where('state', '==', 'online'));
+  
+  onSnapshot(onlineStatusQuery, (snapshot) => {
+    snapshot.docChanges().forEach(function(change){
+      if(change.type === 'added'){
+        console.log('added')
+      }
+      if(change.type === 'modified'){
+        console.log('modified')
+      }
+      if(change.type === 'removed'){
+        console.log('removed')
+      }
+    })
+  });
   const fetchData = async () => {
   var uid = null
     try {

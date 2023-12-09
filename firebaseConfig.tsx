@@ -34,7 +34,7 @@ const firebaseConfig = {
 };
 const FIREBASE_APP = initializeApp(firebaseConfig);
 const FIREBASE_DB = initializeFirestore(FIREBASE_APP, { experimentalForceLongPolling: true });
-const FIREBASE_RTDB = getDatabase(FIREBASE_APP);
+const FIREBASE_RTDB = getDatabase(FIREBASE_APP,'https://icebreaker-16bc6-default-rtdb.firebaseio.com');
 initializeAuth(FIREBASE_APP, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage)
 });
