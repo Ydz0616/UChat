@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import ProfilePicture, { defaultProfilePictureURL } from '../components/ProfilePicture';
 import { ref, onValue } from "firebase/database";
 import { Timestamp, arrayUnion } from 'firebase/firestore';
-import { Router, router } from 'expo-router';
+import {router } from 'expo-router';
 export default function ModalScreen() {
 
   const db = FIREBASE_DB;
@@ -114,6 +114,7 @@ export default function ModalScreen() {
           chatting: false,
         });
         Alert.alert('Chat Aborted')
+        router.replace('/(tabs)/chat')
       }
 
     } catch (error) { console.log(error) }
@@ -178,7 +179,7 @@ export default function ModalScreen() {
 
   const sendConnectRequest = async () => {
     Alert.alert(`Connect with ${name}`,
-      `${name} will be notified of your connection request. If they agree to connect, you emails and phone numbers will be exchanged.`, [
+      `${name} will be notified of your connection request. If they agree to connect, your emails and phone numbers will be exchanged.`, [
       {
         text: 'Cancel',
         style: "cancel"
@@ -285,7 +286,7 @@ export default function ModalScreen() {
               </Text>
             ))}
 
-            <Text style={[styles.details, { color: textColor }]}>{online ? 'Online' : 'Offline'}</Text>
+            {/* <Text style={[styles.details, { color: textColor }]}>{online ? 'Online' : 'Offline'}</Text> */}
 
             {getConnectView()}
 
@@ -302,15 +303,18 @@ export default function ModalScreen() {
 
         {/* <View> <GetUser></GetUser></View> */}
         <Text style={styles.details}>
-          Go to search page to look for a user to chat with
+          Go to <Text style={styles.blueUnderline}>search page</Text> to look for a user to chat with
         </Text>
         <Text style={styles.details}>
-          Go to inbox page to receive friend requests
+          Try <Text style={styles.blueUnderline}>shaking your phone</Text> and see what happens
+        </Text>
+        <Text style={styles.details}>
+          Go to <Text style={styles.blueUnderline}>inbox page</Text> to receive friend requests
         </Text>
 
 
         <Text style={styles.details}>
-          Go to profile page to edit your profile
+          Go to <Text style={styles.blueUnderline}>profile page</Text>  edit your profile
         </Text>
       </View>)}
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
@@ -324,6 +328,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  blueUnderline: {
+    color: 'blue',
+    textDecorationLine: 'underline',
+    fontWeight: 'bold',
   },
   centerContent: {
     justifyContent: 'center',
