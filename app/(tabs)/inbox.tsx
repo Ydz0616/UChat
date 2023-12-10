@@ -1,16 +1,88 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, FlatList, Button, Pressable, Modal, Alert } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, FlatList, Button, Pressable, Modal, Alert, Platform } from 'react-native';
 import { Text, View } from '../../components/Themed';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
 import { collection, getDocs, query, where, serverTimestamp, updateDoc, onSnapshot } from 'firebase/firestore';
 import { CreateChat } from '../../components/Find';
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function TabOneScreen() {
   const [modalText, setModalText] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [userNotifications, setUserNotifications] = useState<any[]>([])
+  const firstLoad = useRef(true)
   const user = FIREBASE_AUTH.currentUser;
+
+  const notificationListener = useRef<Notifications.Subscription>();
+  const responseListener = useRef<Notifications.Subscription>();
+  const schedulePushNotification = async (title:string, body:string) => {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: title,
+        body: body,
+      },
+      trigger: { seconds: 60 * 15 }, // wait 15 minutes
+    });
+  }
+
+  useEffect(() => {
+    const registerForPushNotificationsAsync = async () => {
+      let token;
+
+      if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('default', {
+          name: 'default',
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#FF231F7C',
+        });
+      }
+
+      if (Device.isDevice) {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+          const { status } = await Notifications.requestPermissionsAsync();
+          finalStatus = status;
+        }
+        if (finalStatus !== 'granted') {
+          alert('Failed to get push token for push notification!');
+          return;
+        }
+        
+        token = (await Notifications.getExpoPushTokenAsync({ projectId: 'd2626dc3-9874-4f52-bb58-e3b7ad6dd6bc' })).data;
+        console.log('TOKEN:', token);
+      } else {
+        alert('Must use physical device for Push Notifications');
+      }
+
+      return token;
+    }
+
+    registerForPushNotificationsAsync().then(token => console.log('TOKEN:', token));
+
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      console.log('NOTIFICATION:', notification);
+    });
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log('RESPONSE:', response);
+    });
+
+    return () => {
+      if (notificationListener.current) Notifications.removeNotificationSubscription(notificationListener.current);
+      if (responseListener.current) Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
 
   const fetchData = async () => {
     setUserNotifications([])
@@ -29,6 +101,12 @@ export default function TabOneScreen() {
           }
         });
 
+        if (!firstLoad.current && updatedNotifications.length !== 0) {
+          schedulePushNotification('It\'s time to break the ice!! ❄️', 'Hey, you left something in your inbox. Ready to check?')
+        } else if (updatedNotifications.length === 0) {
+          Notifications.cancelAllScheduledNotificationsAsync()
+        }
+        firstLoad.current = false
         setUserNotifications(updatedNotifications);
       });
       return () => {
@@ -43,6 +121,7 @@ export default function TabOneScreen() {
   useEffect(() => {
     fetchData();
   }, []);
+
 
 
   const handleUserInfoRequest = async (senderUid: string) => {
@@ -103,51 +182,53 @@ export default function TabOneScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      {/* TODO: display user info in dialog */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => { setModalVisible(!modalVisible) }}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>{modalText}</Text>
-            <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}>
-              <Text style={styles.textStyle}>Close</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
-      {userNotifications.length > 0 ?
-        <FlatList
-          data={userNotifications}
-          keyExtractor={item => item?.type + item?.receiver + item?.sender}
-          renderItem={({ item }) => (
-            <View style={styles.resultContainer}>
-              {/* TODO: account for other notification types */}
-              {item.type === 'friend-request' ?
-                <>
-                  <Text style={styles.header}>You have a friend request!</Text>
-                  <Text style={styles.message}>Ready to break the ice with <Text style={styles.messageHighlight}>{item.sender}</Text>?</Text>
-                  <Pressable onPress={() => handleUserInfoRequest(item.sender)}>
-                    <Text style={styles.ref}>Click here to learn more about user</Text>
-                  </Pressable>
-                  <View style={styles.btngroup}>
-                    <Button title='Accept' onPress={() => handleFriendRequestAction(item.sender, item.receiver, 'accepted')} />
-                    <Button title='Reject' onPress={() => handleFriendRequestAction(item.sender, item.receiver, 'rejected')} />
-                  </View>
-
-                </>
-
-                : <Text>Not Currently Handled</Text>}
+    <>
+      <View style={styles.container}>
+        {/* TODO: display user info in dialog */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => { setModalVisible(!modalVisible) }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>{modalText}</Text>
+              <Pressable
+                style={[styles.button, styles.buttonClose]}
+                onPress={() => setModalVisible(!modalVisible)}>
+                <Text style={styles.textStyle}>Close</Text>
+              </Pressable>
             </View>
-          )}
-        />
-        : <Text style={styles.modalText}>No notifications</Text>}
-    </View>
+          </View>
+        </Modal>
+        {userNotifications.length > 0 ?
+          <FlatList
+            data={userNotifications}
+            keyExtractor={item => item?.type + item?.receiver + item?.sender}
+            renderItem={({ item }) => (
+              <View style={styles.resultContainer}>
+                {/* TODO: account for other notification types */}
+                {item.type === 'friend-request' ?
+                  <>
+                    <Text style={styles.header}>You have a friend request!</Text>
+                    <Text style={styles.message}>Ready to break the ice with <Text style={styles.messageHighlight}>{item.sender}</Text>?</Text>
+                    <Pressable onPress={() => handleUserInfoRequest(item.sender)}>
+                      <Text style={styles.ref}>Click here to learn more about user</Text>
+                    </Pressable>
+                    <View style={styles.btngroup}>
+                      <Button title='Accept' onPress={() => handleFriendRequestAction(item.sender, item.receiver, 'accepted')} />
+                      <Button title='Reject' onPress={() => handleFriendRequestAction(item.sender, item.receiver, 'rejected')} />
+                    </View>
+
+                  </>
+
+                  : <Text>Not Currently Handled</Text>}
+              </View>
+            )}
+          />
+          : <Text style={styles.modalText}>No notifications</Text>}
+      </View>
+    </>
   );
 }
 
