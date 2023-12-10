@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { StyleSheet, Button, Alert, ScrollView, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Button, Alert, ScrollView, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, FlatList, Pressable } from 'react-native';
 import { Text, TextInput, View, DropDownPicker } from '../../components/Themed';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../../firebaseConfig';
-import { collection, serverTimestamp, addDoc } from 'firebase/firestore';
+import { collection, serverTimestamp, addDoc, query, where, onSnapshot } from 'firebase/firestore';
 
 
 export default function TabOneScreen() {
@@ -31,7 +31,41 @@ export default function TabOneScreen() {
     { label: 'Other', value: 'other' },
   ]);
 
+  const [userRequests, setUserRequests] = useState<any[]>([])
+  const [showReports, setShowReports] = useState(false)
+
   const user = FIREBASE_AUTH.currentUser;
+
+  const fetchData = async () => {
+    setUserRequests([])
+    try {
+      const notificationsRef = collection(FIREBASE_DB, 'reports');
+      const queryRef = query(notificationsRef, where('reporter', '==', user!.uid));
+
+      const eventlistener = onSnapshot(queryRef, (querySnapshot) => {
+        let updatedRequests: any[] = [];
+
+        querySnapshot.forEach((doc) => {
+          const request = doc.data() as any; // Type assertion
+          console.log('Req:', request)
+          updatedRequests.push(request);
+        });
+
+        setUserRequests(updatedRequests);
+        console.log('REQUESTS:', updatedRequests)
+      });
+      return () => {
+        // Unsubscribe from the snapshot listener when component unmounts
+        eventlistener();
+      };
+    } catch (error) {
+
+    }
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleReportSubmit = async () => {
     if (!reportUser || !reportCategory || !reportDescription) {
@@ -93,65 +127,88 @@ export default function TabOneScreen() {
 
   return (
     <View style={styles.container}>
-      <KeyboardAvoidingView style={styles.container} behavior="padding" keyboardVerticalOffset={100}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ScrollView contentContainerStyle={styles.container}>
-            <View style={{ height: 10 }} />
-            <Text style={styles.header}>Report User</Text>
-            <TextInput
-              style={styles.input}
-              placeholder='Username'
-              value={reportUser}
-              onChangeText={setReportUser} />
-            <View style={{ height: 10 }} />
-            <DropDownPicker
-              open={reportCategoryOpen}
-              placeholder='Category'
-              value={reportCategory}
-              items={reportCategories}
-              setOpen={setReportCategoryOpen}
-              setValue={setReportCategory}
-              setItems={setReportCategories}
-              style={[styles.drowpdown, { alignSelf: 'center' }]}
+      {showReports ?
+        <View style={{ flex: 1 }}>
+          <Button title='Close Reports' onPress={() => setShowReports(false)} />
+          {userRequests.length > 0 ?
+            <FlatList
+              data={userRequests}
+              keyExtractor={item => item?.type + item?.receiver + item?.sender}
+              renderItem={({ item }) => (
+                <View style={styles.resultContainer}>
+                  {/* TODO: account for other notification types */}
+                    <>
+                      <Text style={styles.header}>Category: {item.category}</Text>
+                      <Text style={styles.description}>Description: {item.description}</Text>
+                      <Text style={styles.description2}>Status: {item.status}</Text>
+                    </>
+                </View>
+              )}
             />
-            <View style={{ height: 10 }} />
-            <TextInput
-              multiline={true}
-              numberOfLines={4}
-              style={styles.input}
-              placeholder='What should we know?'
-              value={reportDescription}
-              onChangeText={setReportDescription} />
-            <View style={{ height: 10 }} />
-            <Button title='Submit Report' onPress={handleReportSubmit} />
-            <View style={{ height: 20 }} />
+            : <Text style={styles.modalText}>No reports submitted yet</Text>}
+        </View>
+        :
+        <KeyboardAvoidingView style={styles.container} behavior="padding" keyboardVerticalOffset={100}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <ScrollView contentContainerStyle={styles.container}>
+              <Button title='View Reports' onPress={() => setShowReports(true)} />
+              <View style={{ height: 10, paddingTop: 40 }} />
+              <Text style={styles.header}>Report User</Text>
+              <TextInput
+                style={styles.input}
+                placeholder='Username'
+                value={reportUser}
+                onChangeText={setReportUser} />
+              <View style={{ height: 10 }} />
+              <DropDownPicker
+                open={reportCategoryOpen}
+                placeholder='Category'
+                value={reportCategory}
+                items={reportCategories}
+                setOpen={setReportCategoryOpen}
+                setValue={setReportCategory}
+                setItems={setReportCategories}
+                style={[styles.drowpdown, { alignSelf: 'center' }]}
+              />
+              <View style={{ height: 10 }} />
+              <TextInput
+                multiline={true}
+                numberOfLines={4}
+                style={styles.input}
+                placeholder='What should we know?'
+                value={reportDescription}
+                onChangeText={setReportDescription} />
+              <View style={{ height: 10 }} />
+              <Button title='Submit Report' onPress={handleReportSubmit} />
+              <View style={{ height: 20 }} />
 
-            <Text style={styles.header}>Contact Developers</Text>
-            <View style={{ height: 10 }} />
-            <DropDownPicker
-              open={contactCategoryOpen}
-              placeholder='Category'
-              value={contactCategory}
-              items={contactCategories}
-              setOpen={setContactCategoryOpen}
-              setValue={setContactCategory}
-              setItems={setContactCategories}
-              style={[styles.drowpdown, { alignSelf: 'center' }]}
-            />
-            <View style={{ height: 10 }} />
-            <TextInput
-              multiline={true}
-              numberOfLines={4}
-              style={styles.input}
-              placeholder='Please include as much information as possible'
-              value={contactDescription}
-              onChangeText={setContactDescription} />
-            <View style={{ height: 10 }} />
-            <Button title='Send' onPress={handleContactSubmit} />
-            <View style={{ height: 10 }} />
-          </ScrollView>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+              <Text style={styles.header}>Contact Developers</Text>
+              <View style={{ height: 10 }} />
+              <DropDownPicker
+                open={contactCategoryOpen}
+                placeholder='Category'
+                value={contactCategory}
+                items={contactCategories}
+                setOpen={setContactCategoryOpen}
+                setValue={setContactCategory}
+                setItems={setContactCategories}
+                style={[styles.drowpdown, { alignSelf: 'center' }]}
+              />
+              <View style={{ height: 10 }} />
+              <TextInput
+                multiline={true}
+                numberOfLines={4}
+                style={styles.input}
+                placeholder='Please include as much information as possible'
+                value={contactDescription}
+                onChangeText={setContactDescription} />
+              <View style={{ height: 10 }} />
+              <Button title='Send' onPress={handleContactSubmit} />
+              <View style={{ height: 10 }} />
+            </ScrollView>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      }
     </View>
   );
 }
@@ -163,8 +220,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   header: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
+  },
+  description: {
+    fontSize: 14,
+  },
+  description2: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    fontWeight: 'bold',
+    color: 'gray',
   },
   input: {
     borderBottomColor: 'gray',
@@ -184,5 +250,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 10,
     elevation: 2,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+    color: 'black',
+  },
+  resultContainer: {
+    marginTop: 8,
   },
 });
