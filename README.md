@@ -1,4 +1,4 @@
-##Team Members:
+## Team Members:
 
 Yuandong Zhang
 Vincent Chen
@@ -6,7 +6,7 @@ Phong Le
 Stephon Ricks
 Vedarsh Shah
 
-##From Milestone 4:
+## From Milestone 4:
 Vedarsh added feature to reveal true identity to further connect with chatting partner. Requires consent from both parties to reveal information.
 Vincent worked on adding "shake" feature for searching for a random online chatting partner. He did a little bit of refactoring. Just a little bit.
 Phong improved UI and focused on polishing code. 
