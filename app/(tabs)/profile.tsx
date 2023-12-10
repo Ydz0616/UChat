@@ -8,6 +8,7 @@ import EditProfile from '../../components/EditProfile'
 import ResetPassword from '../../components/ResetPassword';
 import SignOut from '../../components/SignOut';
 import ProfilePicture, { defaultProfilePictureURL } from '../../components/ProfilePicture';
+import { majorsMap } from '../../constants/profile_constants';
 
 export default function TabThreeScreen({}) {
   const firestore = getFirestore(FIREBASE_APP);
@@ -25,20 +26,6 @@ export default function TabThreeScreen({}) {
   const [profileSaveCount, setProfileSaveCount] = useState(0);
   const auth  = FIREBASE_AUTH;
   const db = FIREBASE_DB;
-
-  const majorsMap = new Map([
-    ['cs', 'Computer Science'],
-    ['ece', 'Electrical Engineering'],
-    ['math', 'Math'],
-    ['physics', 'Physics'],
-    ['biology', 'Biology'],
-    ['economics', 'Economics'],
-    ['romance studies', 'Romance Studies'],
-    ['theater studies', 'Theater Studies'],
-    ['mechanical engineering', 'Mechanical Engineering'],
-    ['civil engineering', 'Civil Engineering'],
-    ['bme', 'Biomedical Engineering']
-  ]);
 
   useEffect(() => {
     const user = auth.currentUser;

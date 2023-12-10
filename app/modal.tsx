@@ -8,6 +8,7 @@ import ProfilePicture, { defaultProfilePictureURL } from '../components/ProfileP
 import { ref, onValue } from "firebase/database";
 import { Timestamp, arrayUnion } from 'firebase/firestore';
 import {router } from 'expo-router';
+import { majorsMap } from '../constants/profile_constants';
 export default function ModalScreen() {
 
   const db = FIREBASE_DB;
@@ -28,19 +29,6 @@ export default function ModalScreen() {
   const [email, setEmail] = useState('' as any)
   const [phoneNumber, setPhoneNumber] = useState('' as any)
   const rtdb = FIREBASE_RTDB;
-  const majorsMap = new Map([
-    ['cs', 'Computer Science'],
-    ['ece', 'Electrical Engineering'],
-    ['math', 'Math'],
-    ['physics', 'Physics'],
-    ['biology', 'Biology'],
-    ['economics', 'Economics'],
-    ['romance studies', 'Romance Studies'],
-    ['theater studies', 'Theater Studies'],
-    ['mechanical engineering', 'Mechanical Engineering'],
-    ['civil engineering', 'Civil Engineering'],
-    ['bme', 'Biomedical Engineering']
-  ]);
 
   const fetchData = async () => {
 
